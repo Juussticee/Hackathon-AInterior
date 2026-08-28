@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import { useApp } from "@/components/app-provider";
 import { formatPrice } from "@/lib/utils";
 import Link from "next/link";
-import { Plus, Clock, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { Plus, Clock, CheckCircle, AlertCircle, Loader2, Sparkles } from "lucide-react";
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
@@ -100,8 +100,9 @@ export default function DashboardPage() {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <div className="text-brand-300 text-4xl">A</div>
+                  <div className="w-full h-full flex flex-col items-center justify-center gap-2">
+                    <Sparkles className="w-8 h-8 text-brand-300" />
+                    <span className="text-xs text-brand-400">No visualization</span>
                   </div>
                 )}
                 <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1">

@@ -11,14 +11,12 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "oaidalleapiprodscus.blob.core.windows.net" },
       { protocol: "https", hostname: "cdn.openai.com" },
+      { protocol: "http", hostname: "localhost" },
     ],
+    dangerouslyAllowSVG: true,
   },
   serverExternalPackages: ["better-sqlite3"],
-  experimental: {
-    turbo: {
-      root: ".",
-    },
-  },
 };
+
 
 export default nextConfig;

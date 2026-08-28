@@ -8,18 +8,54 @@ import type {
   Product,
   RoomType,
 } from "@/lib/types";
+import { readFileSync, existsSync } from "fs";
+import path from "path";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+/**
+ * Converts an imageUrl to a form GPT-4o vision can accept.
+ * - External https:// URLs are passed directly.
+ * - Local /uploads/... paths are read from disk and base64-encoded.
+ * - data:... base64 URLs are passed directly.
+ * Returns null if the image is unusable.
+ */
+function resolveImageUrl(imageUrl: string | null | undefined): string | null {
+  if (!imageUrl) return null;
+  if (imageUrl.startsWith("data:")) return imageUrl;
+  if (imageUrl.startsWith("https://")) return imageUrl;
+  // Local path (e.g. /uploads/abc.jpg)
+  if (imageUrl.startsWith("/uploads/") || imageUrl.startsWith("/public/")) {
+    try {
+      const filePath = path.join(process.cwd(), "public", imageUrl.startsWith("/public") ? imageUrl.slice(8) : imageUrl);
+      if (!existsSync(filePath)) return null;
+      const buf = readFileSync(filePath);
+      const ext = path.extname(filePath).slice(1).toLowerCase();
+      const mime = ext === "png" ? "image/png" : ext === "webp" ? "image/webp" : "image/jpeg";
+      return `data:${mime};base64,${buf.toString("base64")}`;
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
 
 // ================================================================
 // STAGE 1: Space Analysis
 // ================================================================
 export async function analyzeSpace(
-  imageUrl: string,
+  imageUrl: string | null | undefined,
   roomType: RoomType,
   dimensions: { length: number; width: number; height?: number }
 ): Promise<SpaceAnalysis> {
   const areaSqm = (dimensions.length / 100) * (dimensions.width / 100);
+  const resolvedUrl = resolveImageUrl(imageUrl);
+
+  // If no usable image, skip vision and return dimension-based analysis
+  if (!resolvedUrl) {
+    console.log("No usable image URL — using dimension-based analysis");
+    return buildFallbackAnalysis(roomType, dimensions, areaSqm);
+  }
 
   try {
     const response = await openai.chat.completions.create({
@@ -50,7 +86,7 @@ Estimate wall lengths based on the provided dimensions. Be realistic about windo
           content: [
             {
               type: "image_url",
-              image_url: { url: imageUrl, detail: "high" },
+              image_url: { url: resolvedUrl, detail: "high" },
             },
             {
               type: "text",
@@ -80,24 +116,31 @@ Estimate wall lengths based on the provided dimensions. Be realistic about windo
     };
   } catch (error) {
     console.error("Space analysis error:", error);
-    // Fallback analysis based on dimensions only
-    return {
-      roomType,
-      estimatedAreaSqm: areaSqm,
-      shape: "rectangular",
-      walls: [
-        { id: "w1", lengthM: dimensions.length / 100, hasWindow: true, hasDoor: false },
-        { id: "w2", lengthM: dimensions.width / 100, hasWindow: false, hasDoor: true },
-        { id: "w3", lengthM: dimensions.length / 100, hasWindow: false, hasDoor: false },
-        { id: "w4", lengthM: dimensions.width / 100, hasWindow: false, hasDoor: false },
-      ],
-      existingFurniture: [],
-      floorType: "unknown",
-      lighting: "mixed",
-      availableWallSpaceSqm: areaSqm * 0.7,
-      constraints: [],
-    };
+    return buildFallbackAnalysis(roomType, dimensions, areaSqm);
   }
+}
+
+function buildFallbackAnalysis(
+  roomType: RoomType,
+  dimensions: { length: number; width: number; height?: number },
+  areaSqm: number
+): SpaceAnalysis {
+  return {
+    roomType,
+    estimatedAreaSqm: areaSqm,
+    shape: "rectangular",
+    walls: [
+      { id: "w1", lengthM: dimensions.length / 100, hasWindow: true, hasDoor: false },
+      { id: "w2", lengthM: dimensions.width / 100, hasWindow: false, hasDoor: true },
+      { id: "w3", lengthM: dimensions.length / 100, hasWindow: false, hasDoor: false },
+      { id: "w4", lengthM: dimensions.width / 100, hasWindow: false, hasDoor: false },
+    ],
+    existingFurniture: [],
+    floorType: "unknown",
+    lighting: "mixed",
+    availableWallSpaceSqm: areaSqm * 0.7,
+    constraints: [],
+  };
 }
 
 // ================================================================
@@ -409,11 +452,10 @@ export async function runDesignPipeline(params: {
   ).run(projectId);
 
   // Step 1: Analyze space
-  const defaultImage =
-    "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80";
-  const imageUrl = params.roomImageUrl || defaultImage;
+  // Pass the user's image directly — resolveImageUrl() inside analyzeSpace handles
+  // local paths (reads from disk) and falls back to dimension-based analysis if none.
   const spaceAnalysis = await analyzeSpace(
-    imageUrl,
+    params.roomImageUrl,
     params.roomType,
     params.dimensions
   );

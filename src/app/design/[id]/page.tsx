@@ -7,11 +7,14 @@ import { formatPrice } from "@/lib/utils";
 import {
   ExternalLink,
   Save,
-  CheckCircle,
+  CheckCircle2,
   ArrowLeft,
   Loader2,
   Sparkles,
-  ShoppingCart,
+  ShoppingBag,
+  Info,
+  Building2,
+  Maximize2,
 } from "lucide-react";
 
 interface DesignProduct {
@@ -23,12 +26,29 @@ interface DesignProduct {
     name: string;
     company_name: string;
     price_aed: number;
+    original_price_aed: number | null;
     main_image_url: string;
     product_url: string;
     subcategory: string;
     materials: string | null;
     colors: string;
+    description: string | null;
   };
+}
+
+interface Design {
+  id: string;
+  room_type: string;
+  style_slug: string;
+  room_length_cm: number;
+  room_width_cm: number;
+  budget_aed: number;
+  status: string;
+  visualization_url: string | null;
+  design_explanation: string | null;
+  total_cost_aed: number | null;
+  selected_products: DesignProduct[] | null;
+  created_at: string;
 }
 
 export default function DesignResultPage() {
@@ -37,9 +57,10 @@ export default function DesignResultPage() {
   const { t, currency } = useApp();
   const id = params.id as string;
 
-  const [design, setDesign] = useState<Record<string, unknown> | null>(null);
+  const [design, setDesign] = useState<Design | null>(null);
   const [loading, setLoading] = useState(true);
-  const [saved, setSaved] = useState(false);
+  const [saved, setSaved] = useState(true); // Designs auto-save on generation
+  const [vizExpanded, setVizExpanded] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -47,7 +68,7 @@ export default function DesignResultPage() {
         const res = await fetch(`/api/designs/${id}`);
         if (res.ok) {
           const data = await res.json();
-          setDesign(data.design);
+          setDesign(data.design as Design);
         }
       } catch {
         console.error("Failed to load design");
@@ -62,8 +83,8 @@ export default function DesignResultPage() {
     return (
       <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 text-brand-600 animate-spin mx-auto mb-4" />
-          <p className="text-brand-500">{t("common.loading")}</p>
+          <Loader2 className="w-8 h-8 text-brand-600 animate-spin mx-auto mb-3" />
+          <p className="text-brand-500 text-sm">{t("common.loading")}</p>
         </div>
       </div>
     );
@@ -73,10 +94,10 @@ export default function DesignResultPage() {
     return (
       <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
         <div className="text-center">
-          <p className="text-brand-500 mb-4">Design not found</p>
+          <p className="text-brand-500 mb-4">Design not found.</p>
           <button
             onClick={() => router.push("/dashboard")}
-            className="text-brand-600 hover:text-brand-800 font-medium text-sm"
+            className="text-brand-600 hover:underline text-sm font-medium"
           >
             Go to Dashboard
           </button>
@@ -85,155 +106,226 @@ export default function DesignResultPage() {
     );
   }
 
-  const products = (design.selected_products || []) as DesignProduct[];
-  const totalCost = (design.total_cost_aed as number) || 0;
-  const visualizationUrl = design.visualization_url as string | null;
-  const explanation = design.design_explanation as string | null;
-  const roomType = (design.room_type as string) || "";
-  const styleSlug = (design.style_slug as string) || "";
+  const products = design.selected_products || [];
+  const totalCost = design.total_cost_aed || 0;
+  const savings =
+    design.budget_aed > totalCost ? design.budget_aed - totalCost : 0;
+
+  // Group products by category
+  const byCategory: Record<string, DesignProduct[]> = {};
+  for (const sp of products) {
+    const cat = sp.category || sp.product.subcategory;
+    if (!byCategory[cat]) byCategory[cat] = [];
+    byCategory[cat].push(sp);
+  }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-brand-50/50 pb-16">
-      {/* Back button */}
-      <div className="mx-auto max-w-6xl px-4 pt-6">
+    <div className="min-h-[calc(100vh-4rem)] bg-brand-50/40 pb-20">
+      {/* Expanded visualization modal */}
+      {vizExpanded && design.visualization_url && (
+        <div
+          className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+          onClick={() => setVizExpanded(false)}
+        >
+          <img
+            src={design.visualization_url}
+            alt="Room visualization"
+            className="max-w-full max-h-full rounded-xl shadow-2xl"
+          />
+        </div>
+      )}
+
+      {/* Back */}
+      <div className="mx-auto max-w-6xl px-4 pt-6 pb-2">
         <button
           onClick={() => router.push("/dashboard")}
-          className="flex items-center gap-2 text-brand-500 hover:text-brand-700 text-sm mb-6"
+          className="flex items-center gap-1.5 text-brand-400 hover:text-brand-600 text-sm transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           {t("nav.dashboard")}
         </button>
       </div>
 
-      <div className="mx-auto max-w-6xl px-4">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-          <div>
+      <div className="mx-auto max-w-6xl px-4 space-y-6">
+        {/* Header Row */}
+        <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xs font-medium text-brand-500 bg-brand-100 px-2 py-0.5 rounded-full capitalize">
+                {design.style_slug}
+              </span>
+              <span className="text-xs text-brand-400">•</span>
+              <span className="text-xs text-brand-400 capitalize">
+                {design.room_type.replace("_", " ")}
+              </span>
+              <span className="text-xs text-brand-400">•</span>
+              <span className="text-xs text-brand-400">
+                {design.room_length_cm}×{design.room_width_cm} cm
+              </span>
+            </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-brand-900">
               {t("result.title")}
             </h1>
-            <p className="text-brand-500 text-sm mt-1 capitalize">
-              {styleSlug} • {roomType.replace("_", " ")}
-            </p>
           </div>
-          <div className="flex gap-3">
-            <button
-              onClick={() => setSaved(true)}
-              disabled={saved}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                saved
-                  ? "bg-green-50 text-green-600 border border-green-200"
-                  : "bg-brand-600 text-white hover:bg-brand-700"
-              }`}
-            >
-              {saved ? (
-                <>
-                  <CheckCircle className="w-4 h-4" />
-                  {t("result.saved")}
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4" />
-                  {t("result.save")}
-                </>
-              )}
-            </button>
+          <div className="flex items-center gap-2 flex-shrink-0">
             <button
               onClick={() => router.push("/design/new")}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium border border-brand-200 text-brand-600 hover:bg-brand-50 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm border border-brand-200 text-brand-600 hover:bg-brand-50 transition-colors"
             >
-              <Sparkles className="w-4 h-4" />
-              {t("result.newDesign")}
+              <Sparkles className="w-3.5 h-3.5" />
+              New Design
             </button>
+            <div className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm bg-green-50 text-green-600 border border-green-200">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              Saved
+            </div>
           </div>
         </div>
 
-        {/* Visualization */}
-        {visualizationUrl && (
-          <div className="mb-8">
-            <h2 className="text-lg font-semibold text-brand-800 mb-3">
-              {t("result.visualization")}
-            </h2>
-            <div className="relative rounded-2xl overflow-hidden aspect-[16/9] bg-brand-100">
-              <img
-                src={visualizationUrl}
-                alt="Room visualization"
-                className="w-full h-full object-cover"
-              />
+        {/* Main Grid: Visualization + Stats */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Visualization — takes 2 columns */}
+          <div className="lg:col-span-2">
+            <div className="relative rounded-2xl overflow-hidden bg-brand-100 aspect-[16/10] group cursor-pointer shadow-sm"
+              onClick={() => setVizExpanded(true)}>
+              {design.visualization_url ? (
+                <>
+                  <img
+                    src={design.visualization_url}
+                    alt="Room visualization"
+                    className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <button className="absolute top-3 right-3 bg-white/80 backdrop-blur-sm text-brand-700 p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Maximize2 className="w-4 h-4" />
+                  </button>
+                </>
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center text-brand-300">
+                  <Sparkles className="w-12 h-12 mb-3" />
+                  <p className="text-sm">Visualization unavailable</p>
+                </div>
+              )}
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent p-3">
+                <div className="flex items-center gap-1.5">
+                  <Info className="w-3 h-3 text-white/70" />
+                  <p className="text-xs text-white/80">
+                    {t("result.visualization.note")}
+                  </p>
+                </div>
+              </div>
             </div>
-            <p className="text-xs text-brand-400 mt-2 italic">
-              {t("result.visualization.note")}
-            </p>
           </div>
-        )}
 
-        {/* Cost Summary */}
-        <div className="bg-white rounded-xl border border-brand-100 p-6 mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <p className="text-sm text-brand-500 mb-1">
+          {/* Stats column */}
+          <div className="space-y-3">
+            {/* Cost card */}
+            <div className="bg-white rounded-xl border border-brand-100 p-5">
+              <p className="text-xs text-brand-400 mb-1">
                 {t("result.totalCost")}
               </p>
-              <p className="text-3xl font-bold text-brand-900">
+              <p className="text-3xl font-bold text-brand-900 leading-none">
                 {formatPrice(totalCost, currency)}
               </p>
-              {currency === "USD" && (
+              {currency === "AED" && (
                 <p className="text-sm text-brand-400 mt-1">
-                  AED {totalCost.toLocaleString()}
+                  ≈ ${Math.round(totalCost * 0.27).toLocaleString()} USD
                 </p>
               )}
+              {savings > 0 && (
+                <div className="mt-3 flex items-center gap-1.5 text-xs text-green-600 bg-green-50 px-2.5 py-1.5 rounded-lg">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  AED {savings.toLocaleString()} under budget
+                </div>
+              )}
             </div>
-            <div className="flex gap-6 text-center">
-              <div>
-                <p className="text-2xl font-bold text-brand-700">
-                  {products.length}
-                </p>
-                <p className="text-xs text-brand-400">Items</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-brand-700 capitalize">
-                  {styleSlug}
-                </p>
-                <p className="text-xs text-brand-400">Style</p>
+
+            {/* Stats grid */}
+            <div className="bg-white rounded-xl border border-brand-100 p-5 space-y-3">
+              {[
+                { label: "Items selected", value: String(products.length) },
+                {
+                  label: "Style",
+                  value:
+                    design.style_slug.charAt(0).toUpperCase() +
+                    design.style_slug.slice(1),
+                },
+                { label: "Retailers", value: "3 UAE stores" },
+              ].map(({ label, value }) => (
+                <div key={label} className="flex justify-between text-sm">
+                  <span className="text-brand-500">{label}</span>
+                  <span className="font-medium text-brand-800">{value}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Retailers logos area */}
+            <div className="bg-white rounded-xl border border-brand-100 p-4">
+              <p className="text-xs text-brand-400 mb-3 font-medium">
+                PRODUCTS FROM
+              </p>
+              <div className="space-y-2">
+                {[
+                  ...new Set(
+                    products.map((sp) => sp.product.company_name)
+                  ),
+                ].map((company) => (
+                  <div
+                    key={company}
+                    className="flex items-center gap-2 text-sm text-brand-700"
+                  >
+                    <div className="w-6 h-6 rounded bg-brand-100 flex items-center justify-center">
+                      <Building2 className="w-3.5 h-3.5 text-brand-500" />
+                    </div>
+                    {company}
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
 
         {/* Design Explanation */}
-        {explanation && (
-          <div className="bg-white rounded-xl border border-brand-100 p-6 mb-8">
-            <h2 className="text-lg font-semibold text-brand-800 mb-3 flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-brand-500" />
+        {design.design_explanation && (
+          <div className="bg-white rounded-xl border border-brand-100 p-6">
+            <h2 className="text-base font-semibold text-brand-800 mb-3 flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-brand-500" />
               {t("result.explanation")}
             </h2>
-            <div className="prose prose-sm prose-brand max-w-none text-brand-600 leading-relaxed whitespace-pre-line">
-              {explanation}
+            <div className="text-sm text-brand-600 leading-relaxed whitespace-pre-line">
+              {design.design_explanation}
             </div>
           </div>
         )}
 
-        {/* Selected Products */}
+        {/* Products */}
         <div>
           <h2 className="text-lg font-semibold text-brand-800 mb-4 flex items-center gap-2">
-            <ShoppingCart className="w-5 h-5 text-brand-500" />
-            {t("result.products")} ({products.length})
+            <ShoppingBag className="w-5 h-5 text-brand-500" />
+            {t("result.products")}
+            <span className="text-sm font-normal text-brand-400">
+              ({products.length} items • All from approved UAE retailers)
+            </span>
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {products.map((sp, i) => {
               const p = sp.product;
-              const colors =
-                typeof p.colors === "string"
-                  ? JSON.parse(p.colors)
-                  : p.colors || [];
+              let colors: string[] = [];
+              try {
+                colors = typeof p.colors === "string" ? JSON.parse(p.colors) : p.colors || [];
+              } catch {
+                colors = [];
+              }
+              const isOnSale =
+                p.original_price_aed && p.original_price_aed > p.price_aed;
 
               return (
                 <div
                   key={i}
-                  className="bg-white rounded-xl border border-brand-100 overflow-hidden hover:shadow-md transition-shadow group"
+                  className="bg-white rounded-xl border border-brand-100 overflow-hidden group hover:shadow-md hover:border-brand-200 transition-all"
                 >
-                  {/* Product Image */}
+                  {/* Image */}
                   <div className="relative aspect-square bg-brand-50 overflow-hidden">
                     <img
                       src={p.main_image_url}
@@ -244,34 +336,40 @@ export default function DesignResultPage() {
                           "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&q=80";
                       }}
                     />
-                    {p.price_aed < (design.budget_aed as number) * 0.1 && (
-                      <span className="absolute top-2 left-2 bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full">
-                        Great value
+                    {isOnSale && (
+                      <span className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                        SALE
                       </span>
                     )}
+                    <span className="absolute bottom-2 right-2 bg-white/90 backdrop-blur-sm text-brand-600 text-[10px] font-medium px-2 py-0.5 rounded-full border border-brand-100 capitalize">
+                      {sp.category || p.subcategory.replace(/-/g, " ")}
+                    </span>
                   </div>
 
-                  {/* Product Info */}
+                  {/* Info */}
                   <div className="p-4">
-                    <p className="text-xs text-brand-400 mb-1">
-                      {p.company_name} •{" "}
-                      <span className="capitalize">
-                        {p.subcategory.replace(/-/g, " ")}
+                    {/* Retailer badge */}
+                    <div className="flex items-center gap-1.5 mb-1.5">
+                      <Building2 className="w-3 h-3 text-brand-400" />
+                      <span className="text-xs text-brand-400 font-medium">
+                        {p.company_name}
                       </span>
-                    </p>
-                    <h3 className="font-medium text-brand-800 text-sm leading-tight mb-2 line-clamp-2">
+                    </div>
+
+                    {/* Name */}
+                    <h3 className="font-medium text-brand-800 text-sm leading-tight mb-2 line-clamp-2 min-h-[2.5rem]">
                       {p.name}
                     </h3>
 
                     {/* Colors */}
-                    {Array.isArray(colors) && colors.length > 0 && (
-                      <div className="flex gap-1 mb-2">
-                        {colors.slice(0, 3).map((color: string, j: number) => (
+                    {colors.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-2.5">
+                        {colors.slice(0, 3).map((c: string, j: number) => (
                           <span
                             key={j}
-                            className="text-[10px] text-brand-400 bg-brand-50 px-1.5 py-0.5 rounded"
+                            className="text-[10px] text-brand-500 bg-brand-50 px-1.5 py-0.5 rounded-full border border-brand-100"
                           >
-                            {color}
+                            {c}
                           </span>
                         ))}
                       </div>
@@ -279,35 +377,35 @@ export default function DesignResultPage() {
 
                     {/* Price */}
                     <div className="flex items-baseline gap-2 mb-3">
-                      <span className="text-lg font-bold text-brand-900">
+                      <span className="text-xl font-bold text-brand-900">
                         {formatPrice(p.price_aed, currency)}
                       </span>
-                      {currency === "AED" && (
-                        <span className="text-xs text-brand-400">
-                          ≈ ${Math.round(p.price_aed * 0.27)}
+                      {isOnSale && (
+                        <span className="text-xs text-brand-400 line-through">
+                          {formatPrice(p.original_price_aed!, currency)}
                         </span>
                       )}
                     </div>
 
-                    {/* Reason */}
-                    <div className="bg-brand-50 rounded-lg px-3 py-2 mb-3">
-                      <p className="text-xs text-brand-500">
-                        <span className="font-medium text-brand-600">
-                          {t("result.product.why")}:
-                        </span>{" "}
+                    {/* AI Reason */}
+                    <div className="bg-gradient-to-br from-brand-50 to-brand-100/50 rounded-lg px-3 py-2.5 mb-3 border border-brand-100">
+                      <p className="text-[11px] leading-relaxed text-brand-600">
+                        <span className="text-brand-700 font-semibold">
+                          {t("result.product.why")}:{" "}
+                        </span>
                         {sp.reason}
                       </p>
                     </div>
 
-                    {/* Buy Button */}
+                    {/* Buy CTA */}
                     <a
                       href={p.product_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 w-full bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium py-2.5 rounded-lg transition-colors"
+                      className="flex items-center justify-center gap-2 w-full bg-brand-700 hover:bg-brand-800 text-white text-sm font-medium py-2.5 rounded-lg transition-colors"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
-                      {t("result.product.buy")}
+                      {t("result.product.buy")} on {p.company_name}
                     </a>
                   </div>
                 </div>
