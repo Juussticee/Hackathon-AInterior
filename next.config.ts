@@ -4,16 +4,21 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "assets.danubehome.com" },
-      { protocol: "https", hostname: "**.homecentre.com" },
-      { protocol: "https", hostname: "**.panemirates.com" },
-      { protocol: "https", hostname: "**.panhomestores.com" },
+      { protocol: "https", hostname: "www.homecentre.com" },
+      { protocol: "https", hostname: "m.homecentre.com" },
+      { protocol: "https", hostname: "www.panemirates.com" },
+      { protocol: "https", hostname: "www.panhomestores.com" },
       { protocol: "https", hostname: "images.unsplash.com" },
-      { protocol: "https", hostname: "**.shopprix.com" },
-      { protocol: "https", hostname: "**.landmarkgroup.com" },
-      { protocol: "https", hostname: "oaidalle1.blob.core.windows.net" },
+      { protocol: "https", hostname: "oaidalleapiprodscus.blob.core.windows.net" },
+      { protocol: "https", hostname: "cdn.openai.com" },
     ],
   },
   serverExternalPackages: ["better-sqlite3"],
+  experimental: {
+    turbo: {
+      root: ".",
+    },
+  },
 };
 
 export default nextConfig;
