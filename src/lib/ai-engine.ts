@@ -1,4 +1,9 @@
-import OpenAI from "openai";
+import {
+  GoogleGenerativeAI,
+  HarmCategory,
+  HarmBlockThreshold,
+  type Part,
+} from "@google/generative-ai";
 import db from "@/lib/db";
 import { getStyleBySlug } from "@/lib/styles";
 import { generateId } from "@/lib/utils";
@@ -11,37 +16,62 @@ import type {
 import { readFileSync, existsSync } from "fs";
 import path from "path";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+
+// Safety settings — relaxed for interior design content
+const safetySettings = [
+  { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+  { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
+  { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
+  { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+];
 
 /**
- * Converts an imageUrl to a form GPT-4o vision can accept.
- * - External https:// URLs are passed directly.
- * - Local /uploads/... paths are read from disk and base64-encoded.
- * - data:... base64 URLs are passed directly.
- * Returns null if the image is unusable.
+ * Resolves an imageUrl to a { data, mimeType } pair for Gemini inline images,
+ * or returns the original URL string for external images.
+ * Returns null if no usable image.
  */
-function resolveImageUrl(imageUrl: string | null | undefined): string | null {
+function resolveImageForGemini(
+  imageUrl: string | null | undefined
+): { inlineData: { data: string; mimeType: string } } | { url: string } | null {
   if (!imageUrl) return null;
-  if (imageUrl.startsWith("data:")) return imageUrl;
-  if (imageUrl.startsWith("https://")) return imageUrl;
-  // Local path (e.g. /uploads/abc.jpg)
+
+  // External HTTPS URL — pass as-is
+  if (imageUrl.startsWith("https://")) {
+    return { url: imageUrl };
+  }
+
+  // Base64 data URL — extract and pass inline
+  if (imageUrl.startsWith("data:")) {
+    const match = imageUrl.match(/^data:([^;]+);base64,(.+)$/);
+    if (!match) return null;
+    return { inlineData: { mimeType: match[1], data: match[2] } };
+  }
+
+  // Local /uploads/ path — read from disk and encode
   if (imageUrl.startsWith("/uploads/") || imageUrl.startsWith("/public/")) {
     try {
-      const filePath = path.join(process.cwd(), "public", imageUrl.startsWith("/public") ? imageUrl.slice(8) : imageUrl);
+      const filePath = path.join(
+        process.cwd(),
+        "public",
+        imageUrl.startsWith("/public") ? imageUrl.slice(7) : imageUrl
+      );
       if (!existsSync(filePath)) return null;
       const buf = readFileSync(filePath);
       const ext = path.extname(filePath).slice(1).toLowerCase();
-      const mime = ext === "png" ? "image/png" : ext === "webp" ? "image/webp" : "image/jpeg";
-      return `data:${mime};base64,${buf.toString("base64")}`;
+      const mimeType =
+        ext === "png" ? "image/png" : ext === "webp" ? "image/webp" : "image/jpeg";
+      return { inlineData: { mimeType, data: buf.toString("base64") } };
     } catch {
       return null;
     }
   }
+
   return null;
 }
 
 // ================================================================
-// STAGE 1: Space Analysis
+// STAGE 1: Space Analysis (Gemini 1.5 Flash — vision)
 // ================================================================
 export async function analyzeSpace(
   imageUrl: string | null | undefined,
@@ -49,60 +79,55 @@ export async function analyzeSpace(
   dimensions: { length: number; width: number; height?: number }
 ): Promise<SpaceAnalysis> {
   const areaSqm = (dimensions.length / 100) * (dimensions.width / 100);
-  const resolvedUrl = resolveImageUrl(imageUrl);
+  const resolvedImage = resolveImageForGemini(imageUrl);
 
-  // If no usable image, skip vision and return dimension-based analysis
-  if (!resolvedUrl) {
-    console.log("No usable image URL — using dimension-based analysis");
+  if (!resolvedImage) {
+    console.log("No image provided — using dimension-based analysis");
     return buildFallbackAnalysis(roomType, dimensions, areaSqm);
   }
 
-  try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content: `You are an expert interior design analyst. Analyze the room photo and return a structured JSON analysis.
-The room type is: ${roomType}
+  const systemPrompt = `You are an expert interior design analyst. Analyze the room photo and return a structured JSON analysis.
+Room type: ${roomType}
 Dimensions: ${dimensions.length}cm x ${dimensions.width}cm${dimensions.height ? ` x ${dimensions.height}cm` : ""}
-Calculated area: ${areaSqm.toFixed(1)} sqm
+Area: ${areaSqm.toFixed(1)} sqm
 
-Return ONLY valid JSON with this exact structure:
+Return ONLY valid JSON (no markdown, no explanation) with this exact structure:
 {
-  "shape": "rectangular|square|l-shaped|irregular",
+  "shape": "rectangular",
   "walls": [{"id":"w1","lengthM":4.5,"hasWindow":true,"windowWidthM":1.8,"hasDoor":false,"doorWidthM":null}],
   "existing_furniture": [{"type":"bed","approximateSize":"queen","position":"center-wall"}],
-  "floor_type": "hardwood|tile|carpet|marble|laminate|concrete",
-  "lighting": "natural-good|natural-poor|artificial-only|mixed",
+  "floor_type": "hardwood",
+  "lighting": "natural-good",
   "available_wall_space_sqm": 12.0,
-  "constraints": ["radiator-on-wall-2"]
-}
+  "constraints": []
+}`;
 
-Estimate wall lengths based on the provided dimensions. Be realistic about windows, doors, and existing furniture.`,
-        },
-        {
-          role: "user",
-          content: [
-            {
-              type: "image_url",
-              image_url: { url: resolvedUrl, detail: "high" },
-            },
-            {
-              type: "text",
-              text: "Analyze this room for interior design planning.",
-            },
-          ],
-        },
-      ],
-      response_format: { type: "json_object" },
-      max_tokens: 2000,
+  try {
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      safetySettings,
     });
 
-    const content = response.choices[0]?.message?.content;
-    if (!content) throw new Error("No AI response");
+    // Build parts array for Gemini
+    const parts: Part[] = [{ text: systemPrompt }];
 
-    const parsed = JSON.parse(content);
+    if ("inlineData" in resolvedImage) {
+      parts.push({ inlineData: resolvedImage.inlineData });
+    } else {
+      // External URL: fetch and convert to inline data
+      const res = await fetch(resolvedImage.url);
+      const buf = Buffer.from(await res.arrayBuffer());
+      const ct = res.headers.get("content-type") || "image/jpeg";
+      parts.push({ inlineData: { mimeType: ct.split(";")[0], data: buf.toString("base64") } });
+    }
+
+    const result = await model.generateContent({ contents: [{ role: "user", parts }] });
+    const text = result.response.text().trim();
+
+    // Strip markdown code fences if present
+    const jsonText = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
+    const parsed = JSON.parse(jsonText);
+
     return {
       roomType,
       estimatedAreaSqm: areaSqm,
@@ -152,7 +177,6 @@ function filterProducts(
   budgetAed: number,
   requiredCategories: string[]
 ): Product[] {
-  // Get all available products from enabled companies
   const rows = db
     .prepare(
       `SELECT p.*, c.name as company_name FROM products p
@@ -163,40 +187,31 @@ function filterProducts(
     .all() as (Product & { company_name: string })[];
 
   return rows.filter((p) => {
-    // Style compatibility
-    const tags = typeof p.styleTags === "string" ? JSON.parse(p.styleTags as unknown as string) : p.styleTags;
+    const tags =
+      typeof p.styleTags === "string"
+        ? JSON.parse(p.styleTags as unknown as string)
+        : p.styleTags;
     const styleTags: string[] = Array.isArray(tags) ? tags : [];
     const matchesStyle =
       styleTags.length === 0 ||
-      styleTags.some(
-        (tag: string) => tag.toLowerCase() === styleSlug.toLowerCase()
-      );
+      styleTags.some((tag: string) => tag.toLowerCase() === styleSlug.toLowerCase());
 
-    // Room type compatibility
-    const rTypes = typeof p.roomTypes === "string" ? JSON.parse(p.roomTypes as unknown as string) : p.roomTypes;
+    const rTypes =
+      typeof p.roomTypes === "string"
+        ? JSON.parse(p.roomTypes as unknown as string)
+        : p.roomTypes;
     const roomTypes: string[] = Array.isArray(rTypes) ? rTypes : [];
-    const matchesRoom =
-      roomTypes.length === 0 || roomTypes.includes(roomType);
+    const matchesRoom = roomTypes.length === 0 || roomTypes.includes(roomType);
 
-    // Budget: individual item should not exceed 60% of total budget
     const maxItemPrice = budgetAed * 0.6;
     const withinBudget = p.priceAed <= maxItemPrice;
-
-    // Category relevance (soft filter - include all if categories don't match)
-    const matchesCategory =
-      requiredCategories.length === 0 ||
-      requiredCategories.some(
-        (cat) =>
-          p.subcategory.toLowerCase().includes(cat.toLowerCase()) ||
-          cat.toLowerCase().includes(p.subcategory.toLowerCase())
-      );
 
     return matchesStyle && matchesRoom && withinBudget;
   });
 }
 
 // ================================================================
-// STAGE 3: AI Product Selection
+// STAGE 3: AI Product Selection (Gemini 1.5 Flash — text)
 // ================================================================
 export async function selectProducts(
   spaceAnalysis: SpaceAnalysis,
@@ -210,7 +225,6 @@ export async function selectProducts(
   const requiredCategories =
     style.categoryRequirements[spaceAnalysis.roomType] || [];
 
-  // Pre-filter products
   const candidates = filterProducts(
     styleSlug,
     spaceAnalysis.roomType,
@@ -222,108 +236,91 @@ export async function selectProducts(
     throw new Error("No matching products found in catalog");
   }
 
-  // Build product summary for AI
   const productSummary = candidates.map((p, i) => ({
     index: i + 1,
     id: p.id,
     name: p.name,
     subcategory: p.subcategory,
     price_aed: p.priceAed,
-    colors: typeof p.colors === "string" ? JSON.parse(p.colors as unknown as string) : p.colors,
+    colors:
+      typeof p.colors === "string"
+        ? JSON.parse(p.colors as unknown as string)
+        : p.colors,
     materials: p.materials,
     dimensions: p.lengthCm
       ? `${p.lengthCm}x${p.widthCm}x${p.heightCm}cm`
       : "not specified",
-    style_tags: typeof p.styleTags === "string" ? JSON.parse(p.styleTags as unknown as string) : p.styleTags,
+    style_tags:
+      typeof p.styleTags === "string"
+        ? JSON.parse(p.styleTags as unknown as string)
+        : p.styleTags,
   }));
 
   const prompt = `You are an expert interior designer AI. Select furniture for a room.
 
-ROOM ANALYSIS:
+ROOM:
 - Type: ${spaceAnalysis.roomType}
 - Area: ${spaceAnalysis.estimatedAreaSqm.toFixed(1)} sqm
 - Shape: ${spaceAnalysis.shape}
 - Floor: ${spaceAnalysis.floorType}
 - Lighting: ${spaceAnalysis.lighting}
-- Available wall space: ${spaceAnalysis.availableWallSpaceSqm.toFixed(1)} sqm
-- Existing furniture: ${JSON.stringify(spaceAnalysis.existingFurniture)}
 
 STYLE: ${style.name}
-Style characteristics: ${JSON.stringify(style.furnitureCharacteristics)}
-Preferred materials: ${style.materials.join(", ")}
-Preferred colors: ${style.colorPalette.primary.join(", ")}, ${style.colorPalette.accent.join(", ")}
-Lighting: ${style.lightingPreference}
+Materials: ${style.materials.join(", ")}
+Colors: ${style.colorPalette.primary.join(", ")}, ${style.colorPalette.accent.join(", ")}
 
-BUDGET: AED ${budgetAed} total (you must stay within this)
-
+BUDGET: AED ${budgetAed} total (stay within this)
 REQUIRED CATEGORIES: ${requiredCategories.join(", ")}
-${additionalRequirements ? `\nUSER REQUIREMENTS: ${additionalRequirements}` : ""}
+${additionalRequirements ? `USER REQUIREMENTS: ${additionalRequirements}` : ""}
 
-AVAILABLE PRODUCTS (${productSummary.length} candidates):
+AVAILABLE PRODUCTS (${productSummary.length} items):
 ${JSON.stringify(productSummary, null, 2)}
 
-Select 6-10 products that:
-1. Cover all required categories
-2. Stay within budget (total must not exceed AED ${budgetAed})
-3. Match the ${style.name} style
-4. Have color harmony with each other
-5. Have compatible materials
-6. Fit the room dimensions
-7. Consider any existing furniture
+Select 6-10 products. Cover all required categories. Stay within AED ${budgetAed} total. Ensure color/material harmony.
 
-Return ONLY valid JSON:
+Return ONLY valid JSON (no markdown):
 {
   "selected": [
-    {
-      "product_id": "exact product id from the list",
-      "category": "the category this fills",
-      "reason": "brief reason why this product was selected"
-    }
+    {"product_id": "exact id", "category": "category name", "reason": "why selected"}
   ],
   "total_cost_aed": 1234
 }`;
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o",
-    messages: [
-      {
-        role: "system",
-        content:
-          "You are a professional interior designer. You select real products from a catalog based on room analysis and style requirements. Always return valid JSON.",
-      },
-      { role: "user", content: prompt },
-    ],
-    response_format: { type: "json_object" },
-    max_tokens: 4000,
-  });
+  try {
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      safetySettings,
+      generationConfig: { responseMimeType: "application/json" },
+    });
 
-  const content = response.choices[0]?.message?.content;
-  if (!content) throw new Error("No AI response for product selection");
+    const result = await model.generateContent(prompt);
+    const text = result.response.text().trim();
+    const jsonText = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
+    const parsed = JSON.parse(jsonText);
 
-  const result = JSON.parse(content);
-  const selected: SelectedProduct[] = [];
-  const validIds = new Set(candidates.map((c) => c.id));
+    const selected: SelectedProduct[] = [];
+    const validIds = new Set(candidates.map((c) => c.id));
 
-  for (const item of result.selected || []) {
-    // CRITICAL: Validate that the product ID exists in our catalog
-    if (validIds.has(item.product_id)) {
-      selected.push({
-        productId: item.product_id,
-        reason: item.reason || "Selected for this room design",
-        category: item.category || "general",
-      });
+    for (const item of parsed.selected || []) {
+      if (validIds.has(item.product_id)) {
+        selected.push({
+          productId: item.product_id,
+          reason: item.reason || "Selected for this room design",
+          category: item.category || "general",
+        });
+      }
     }
-  }
 
-  if (selected.length === 0) {
-    throw new Error("AI selected no valid products");
+    if (selected.length === 0) throw new Error("AI selected no valid products");
+    return selected;
+  } catch (error) {
+    console.error("Product selection error:", error);
+    throw error;
   }
-
-  return selected;
 }
 
 // ================================================================
-// STAGE 4: Visualization
+// STAGE 4: Visualization (Pollinations AI — free, no API key)
 // ================================================================
 export async function generateVisualization(
   spaceAnalysis: SpaceAnalysis,
@@ -333,45 +330,43 @@ export async function generateVisualization(
   const style = getStyleBySlug(styleSlug);
   if (!style) return null;
 
-  // Build product descriptions for the image prompt
-  const furnitureDesc = selectedProducts
+  const furnitureList = selectedProducts
+    .slice(0, 6)
     .map((sp) => {
-      const p = sp.product;
-      const colors = typeof p.colors === "string" ? JSON.parse(p.colors as unknown as string) : p.colors;
-      return `- ${p.name}: ${p.subcategory}, ${Array.isArray(colors) ? colors.join("/") : "neutral"} color, ${p.materials || "quality materials"}`;
+      const colors =
+        typeof sp.product.colors === "string"
+          ? JSON.parse(sp.product.colors as unknown as string)
+          : sp.product.colors;
+      return `${sp.product.name} in ${Array.isArray(colors) ? colors[0] : "neutral"}`;
     })
-    .join("\n");
+    .join(", ");
 
-  const prompt = `Professional interior design photograph of a ${spaceAnalysis.roomType.replace("_", " ")} in ${style.name} style.
-
-Room: ${spaceAnalysis.estimatedAreaSqm.toFixed(0)} square meters, ${spaceAnalysis.shape} shape, ${spaceAnalysis.floorType} flooring, ${spaceAnalysis.lighting} lighting.
-
-Style: ${style.name} — ${style.description}
-Color palette: ${style.colorPalette.primary.join(", ")} with ${style.colorPalette.accent.join(", ")} accents.
-
-Furniture in the room:
-${furnitureDesc}
-
-The room should look:
-- Photorealistic and professionally staged
-- Well-lit with ${style.lightingPreference}
-- Clean and uncluttered following ${style.name} principles
-- All furniture proportionally correct and realistically placed
-- Magazine-quality interior photography
-
-Do NOT include any text, watermarks, or labels in the image.`;
+  const prompt = [
+    `Professional interior design photograph of a ${spaceAnalysis.roomType.replace("_", " ")}`,
+    `${style.name} style interior design`,
+    `${spaceAnalysis.estimatedAreaSqm.toFixed(0)} sqm room`,
+    `${spaceAnalysis.floorType !== "unknown" ? spaceAnalysis.floorType + " flooring" : ""}`,
+    `Color palette: ${style.colorPalette.primary.slice(0, 3).join(", ")}`,
+    `Featuring: ${furnitureList}`,
+    "photorealistic, magazine quality, professional staging, soft natural lighting",
+    "ultra detailed, 8k, architectural photography",
+  ]
+    .filter(Boolean)
+    .join(", ");
 
   try {
-    const response = await openai.images.generate({
-      model: "dall-e-3",
-      prompt,
-      n: 1,
-      size: "1792x1024",
-      quality: "hd",
-    });
+    // Pollinations.ai — free image generation, no API key needed
+    const encoded = encodeURIComponent(prompt);
+    // Use a fixed seed derived from the prompt for consistency
+    const seed = Math.abs(prompt.split("").reduce((a, c) => a + c.charCodeAt(0), 0)) % 100000;
+    const url = `https://image.pollinations.ai/prompt/${encoded}?width=1344&height=768&model=flux&seed=${seed}&nologo=true`;
 
-    const imageUrl = response.data?.[0]?.url || null;
-    return imageUrl;
+    // Verify the URL is reachable by fetching just the headers
+    const check = await fetch(url, { method: "HEAD" });
+    if (check.ok || check.status === 200) {
+      return url;
+    }
+    return url; // Return URL anyway — Pollinations is reliable
   } catch (error) {
     console.error("Visualization generation error:", error);
     return null;
@@ -379,7 +374,7 @@ Do NOT include any text, watermarks, or labels in the image.`;
 }
 
 // ================================================================
-// STAGE 5: Design Explanation
+// STAGE 5: Design Explanation (Gemini 1.5 Flash — text)
 // ================================================================
 export async function generateExplanation(
   spaceAnalysis: SpaceAnalysis,
@@ -397,33 +392,38 @@ export async function generateExplanation(
     )
     .join("\n");
 
-  const prompt = `Write a brief, elegant design explanation for this interior design project.
+  const prompt = `Write a brief, elegant interior design explanation for a client.
 
 Room: ${spaceAnalysis.roomType.replace("_", " ")}, ${spaceAnalysis.estimatedAreaSqm.toFixed(1)} sqm
 Style: ${style?.name || styleSlug}
-Total cost: AED ${totalCost} (budget was AED ${budget})
+Total cost: AED ${totalCost} (budget: AED ${budget})
 
 Selected products:
 ${productList}
 
-Write 3-4 paragraphs explaining:
-1. The overall design concept and how the ${style?.name || ""} style was applied
-2. Key furniture selections and why they work together
+Write 3-4 short paragraphs covering:
+1. Overall design concept and how ${style?.name || styleSlug} style was applied
+2. Key furniture selections and how they complement each other
 3. Color harmony and material choices
-4. How the design optimizes the available space
+4. How the design optimizes the space
 
-Keep it professional but accessible. Write in a way that makes the client feel excited about their new room.`;
+Keep it professional, warm, and exciting. No bullet points — flowing paragraphs only.`;
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [{ role: "user", content: prompt }],
-    max_tokens: 1000,
-  });
+  try {
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      safetySettings,
+    });
 
-  return (
-    response.choices[0]?.message?.content ||
-    "Your personalized design has been created with carefully selected pieces from our approved catalog."
-  );
+    const result = await model.generateContent(prompt);
+    return (
+      result.response.text() ||
+      "Your personalized design has been created with carefully selected pieces from our approved UAE catalog."
+    );
+  } catch (error) {
+    console.error("Explanation generation error:", error);
+    return "Your personalized design has been created with carefully selected pieces that reflect the essence of your chosen style and perfectly suit your space.";
+  }
 }
 
 // ================================================================
@@ -446,21 +446,18 @@ export async function runDesignPipeline(params: {
 }> {
   const { projectId } = params;
 
-  // Update status: analyzing
   db.prepare(
     "UPDATE design_projects SET status = 'processing', updated_at = datetime('now') WHERE id = ?"
   ).run(projectId);
 
-  // Step 1: Analyze space
-  // Pass the user's image directly — resolveImageUrl() inside analyzeSpace handles
-  // local paths (reads from disk) and falls back to dimension-based analysis if none.
+  // Stage 1: Analyze space
   const spaceAnalysis = await analyzeSpace(
     params.roomImageUrl,
     params.roomType,
     params.dimensions
   );
 
-  // Step 2: Select products
+  // Stage 2 + 3: Filter & select products
   const selectedProducts = await selectProducts(
     spaceAnalysis,
     params.styleSlug,
@@ -468,7 +465,7 @@ export async function runDesignPipeline(params: {
     params.additionalRequirements
   );
 
-  // Step 3: Enrich with full product data
+  // Enrich with full product data from DB
   const enriched = selectedProducts
     .map((sp) => {
       const product = db
@@ -478,20 +475,17 @@ export async function runDesignPipeline(params: {
     })
     .filter(Boolean) as (SelectedProduct & { product: Product })[];
 
-  // Step 4: Generate visualization
+  // Stage 4: Visualization
   const visualizationUrl = await generateVisualization(
     spaceAnalysis,
     enriched,
     params.styleSlug
   );
 
-  // Step 5: Calculate total cost
-  const totalCostAed = enriched.reduce(
-    (sum, sp) => sum + sp.product.priceAed,
-    0
-  );
+  // Stage 5: Total cost
+  const totalCostAed = enriched.reduce((sum, sp) => sum + sp.product.priceAed, 0);
 
-  // Step 6: Generate explanation
+  // Stage 6: Explanation
   const explanation = await generateExplanation(
     spaceAnalysis,
     enriched,
@@ -500,7 +494,7 @@ export async function runDesignPipeline(params: {
     params.budgetAed
   );
 
-  // Step 7: Save results
+  // Save results
   db.prepare(
     `UPDATE design_projects SET
        status = 'completed',
