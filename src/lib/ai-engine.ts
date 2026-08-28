@@ -104,7 +104,7 @@ Return ONLY valid JSON (no markdown, no explanation) with this exact structure:
 
   try {
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
+      model: "gemini-3.6-flash",
       safetySettings,
     });
 
@@ -290,7 +290,7 @@ Return ONLY valid JSON (no markdown):
 
   try {
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
+      model: "gemini-3.6-flash",
       safetySettings,
       generationConfig: { responseMimeType: "application/json" },
     });
@@ -415,7 +415,7 @@ Keep it professional, warm, and exciting. No bullet points — flowing paragraph
 
   try {
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
+      model: "gemini-3.6-flash",
       safetySettings,
     });
 
