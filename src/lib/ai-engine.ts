@@ -171,12 +171,20 @@ function buildFallbackAnalysis(
 // ================================================================
 // STAGE 2: Product Pre-filtering (deterministic)
 // ================================================================
+// Raw DB row type (snake_case columns)
+type RawProduct = Product & {
+  style_tags: string;
+  room_types: string;
+  price_aed: number;
+  company_name: string;
+};
+
 function filterProducts(
   styleSlug: string,
   roomType: string,
   budgetAed: number,
   requiredCategories: string[]
-): Product[] {
+): RawProduct[] {
   const rows = db
     .prepare(
       `SELECT p.*, c.name as company_name FROM products p
@@ -184,27 +192,24 @@ function filterProducts(
        WHERE p.is_available = 1 AND c.enabled = 1
        ORDER BY p.is_featured DESC, p.price_aed ASC`
     )
-    .all() as (Product & { company_name: string })[];
+    .all() as RawProduct[];
 
   return rows.filter((p) => {
-    const tags =
-      typeof p.styleTags === "string"
-        ? JSON.parse(p.styleTags as unknown as string)
-        : p.styleTags;
-    const styleTags: string[] = Array.isArray(tags) ? tags : [];
+    // style_tags is a JSON string in the DB
+    let styleTags: string[] = [];
+    try { styleTags = JSON.parse(p.style_tags || "[]"); } catch { styleTags = []; }
     const matchesStyle =
       styleTags.length === 0 ||
       styleTags.some((tag: string) => tag.toLowerCase() === styleSlug.toLowerCase());
 
-    const rTypes =
-      typeof p.roomTypes === "string"
-        ? JSON.parse(p.roomTypes as unknown as string)
-        : p.roomTypes;
-    const roomTypes: string[] = Array.isArray(rTypes) ? rTypes : [];
+    // room_types is a JSON string in the DB
+    let roomTypes: string[] = [];
+    try { roomTypes = JSON.parse(p.room_types || "[]"); } catch { roomTypes = []; }
     const matchesRoom = roomTypes.length === 0 || roomTypes.includes(roomType);
 
+    // Budget: single item should not exceed 60% of total budget
     const maxItemPrice = budgetAed * 0.6;
-    const withinBudget = p.priceAed <= maxItemPrice;
+    const withinBudget = p.price_aed <= maxItemPrice;
 
     return matchesStyle && matchesRoom && withinBudget;
   });
@@ -236,25 +241,22 @@ export async function selectProducts(
     throw new Error("No matching products found in catalog");
   }
 
-  const productSummary = candidates.map((p, i) => ({
-    index: i + 1,
-    id: p.id,
-    name: p.name,
-    subcategory: p.subcategory,
-    price_aed: p.priceAed,
-    colors:
-      typeof p.colors === "string"
-        ? JSON.parse(p.colors as unknown as string)
-        : p.colors,
-    materials: p.materials,
-    dimensions: p.lengthCm
-      ? `${p.lengthCm}x${p.widthCm}x${p.heightCm}cm`
-      : "not specified",
-    style_tags:
-      typeof p.styleTags === "string"
-        ? JSON.parse(p.styleTags as unknown as string)
-        : p.styleTags,
-  }));
+  const productSummary = candidates.map((p, i) => {
+    let colors: string[] = [];
+    try { colors = JSON.parse(p.colors as unknown as string || "[]"); } catch { colors = []; }
+    let styleTags: string[] = [];
+    try { styleTags = JSON.parse(p.style_tags || "[]"); } catch { styleTags = []; }
+    return {
+      index: i + 1,
+      id: p.id,
+      name: p.name,
+      subcategory: p.subcategory,
+      price_aed: p.price_aed,
+      colors,
+      materials: p.materials,
+      style_tags: styleTags,
+    };
+  });
 
   const prompt = `You are an expert interior designer AI. Select furniture for a room.
 
@@ -333,11 +335,11 @@ export async function generateVisualization(
   const furnitureList = selectedProducts
     .slice(0, 6)
     .map((sp) => {
-      const colors =
-        typeof sp.product.colors === "string"
-          ? JSON.parse(sp.product.colors as unknown as string)
-          : sp.product.colors;
-      return `${sp.product.name} in ${Array.isArray(colors) ? colors[0] : "neutral"}`;
+      let colors: string[] = [];
+      try {
+        colors = JSON.parse((sp.product as unknown as Record<string,string>).colors || "[]");
+      } catch { colors = []; }
+      return `${sp.product.name} in ${colors[0] || "neutral"}`;
     })
     .join(", ");
 
@@ -387,8 +389,10 @@ export async function generateExplanation(
 
   const productList = selectedProducts
     .map(
-      (sp) =>
-        `- ${sp.product.name} (${sp.product.subcategory}) — AED ${sp.product.priceAed}: ${sp.reason}`
+      (sp) => {
+        const price = (sp.product as unknown as Record<string, number>).price_aed || 0;
+        return `- ${sp.product.name} (${sp.product.subcategory}) — AED ${price}: ${sp.reason}`;
+      }
     )
     .join("\n");
 
@@ -482,8 +486,11 @@ export async function runDesignPipeline(params: {
     params.styleSlug
   );
 
-  // Stage 5: Total cost
-  const totalCostAed = enriched.reduce((sum, sp) => sum + sp.product.priceAed, 0);
+  // Stage 5: Total cost (price_aed from raw DB row)
+  const totalCostAed = enriched.reduce(
+    (sum, sp) => sum + ((sp.product as unknown as Record<string, number>).price_aed || 0),
+    0
+  );
 
   // Stage 6: Explanation
   const explanation = await generateExplanation(
