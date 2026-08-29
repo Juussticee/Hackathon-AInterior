@@ -36,6 +36,7 @@ export async function GET(
   }> = [];
 
   if (typeof design.selected_products === "string") {
+    try {
     const selected = JSON.parse(design.selected_products);
     // Batch-fetch all products with WHERE IN to avoid N+1
     const productIds = selected.map((sp: { productId: string }) => sp.productId).filter(Boolean);
@@ -59,6 +60,7 @@ export async function GET(
         return product ? { ...sp, product } : null;
       })
       .filter(Boolean);
+    } catch { products = []; }
   }
 
   const roomType = String(design.room_type ?? "").replace(/_/g, " ");

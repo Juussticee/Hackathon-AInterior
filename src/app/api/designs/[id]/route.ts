@@ -32,9 +32,10 @@ export async function GET(
 
   // Parse JSON fields
   if (typeof design.space_analysis === "string") {
-    design.space_analysis = JSON.parse(design.space_analysis);
+    try { design.space_analysis = JSON.parse(design.space_analysis); } catch { design.space_analysis = null; }
   }
   if (typeof design.selected_products === "string") {
+    try {
     const selected = JSON.parse(design.selected_products);
     // Batch-fetch all products with WHERE IN to avoid N+1
     const productIds = selected.map((sp: { productId: string }) => sp.productId).filter(Boolean);
@@ -58,6 +59,7 @@ export async function GET(
         return product ? { ...sp, product } : null;
       })
       .filter(Boolean);
+    } catch { design.selected_products = []; }
   }
 
   return NextResponse.json({ design });

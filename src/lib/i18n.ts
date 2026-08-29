@@ -73,6 +73,10 @@ const en = {
   "wizard.style.title": "Choose Your Style",
   "wizard.style.minimalist": "Minimalist",
   "wizard.style.japandi": "Japandi",
+  "wizard.style.modern": "Modern",
+  "wizard.style.industrial": "Industrial",
+  "wizard.style.bohemian": "Bohemian",
+  "wizard.style.coastal": "Coastal",
   "wizard.budget.title": "Set Your Budget",
   "wizard.budget.label": "Budget (AED)",
   "wizard.budget.economy": "Economy",
@@ -106,11 +110,14 @@ const en = {
   "result.saved": "Design Saved",
   "result.newDesign": "New Design",
   "result.share": "Share",
+  "result.share.copied": "Link copied to clipboard!",
+  "result.share.copyLink": "Copy Link",
 
   // Dashboard
   "dashboard.title": "My Projects",
   "dashboard.empty": "No designs yet. Create your first one!",
   "dashboard.create": "New Design",
+  "dashboard.processing": "AI is working on your design...",
 
   // Admin
   "admin.title": "Admin Dashboard",
@@ -124,6 +131,27 @@ const en = {
   "admin.disable": "Disable",
   "admin.save": "Save",
   "admin.cancel": "Cancel",
+
+  // Toast
+  "common.confirm": "Confirm",
+  "common.cancel": "Cancel",
+
+  // Landing extras
+  "landing.stats.title": "Trusted by UAE Homeowners",
+  "landing.stats.designs": "Designs Created",
+  "landing.stats.products": "Real Products",
+  "landing.stats.retailers": "UAE Retailers",
+  "landing.faq.title": "Frequently Asked Questions",
+  "landing.faq.q1": "How accurate is the AI design?",
+  "landing.faq.a1": "Our AI creates photorealistic visualizations and selects real products from approved UAE retailers. The visualization is a conceptual guide — actual product photos are shown on each product card.",
+  "landing.faq.q2": "Can I swap products after generation?",
+  "landing.faq.a2": "Yes! Each product card has a swap button that lets you request an alternative from the same category and price range.",
+  "landing.faq.q3": "Is it free to use?",
+  "landing.faq.a3": "Yes, AInterior is free during our launch period. Create unlimited designs and explore different styles at no cost.",
+  "landing.footer.about": "About",
+  "landing.footer.privacy": "Privacy",
+  "landing.footer.terms": "Terms",
+  "landing.footer.contact": "Contact",
 
   // Common
   "common.loading": "Loading...",
@@ -210,6 +238,10 @@ const ar: Record<string, string> = {
   "wizard.style.title": "اختر أسلوبك",
   "wizard.style.minimalist": "الحد الأدنى",
   "wizard.style.japandi": "جاباندي",
+  "wizard.style.modern": "عصري",
+  "wizard.style.industrial": "صناعي",
+  "wizard.style.bohemian": "بوهيمي",
+  "wizard.style.coastal": "ساحلي",
   "wizard.budget.title": "حدد ميزانيتك",
   "wizard.budget.label": "الميزانية (درهم)",
   "wizard.budget.economy": "اقتصادي",
@@ -242,10 +274,13 @@ const ar: Record<string, string> = {
   "result.saved": "تم حفظ التصميم",
   "result.newDesign": "تصميم جديد",
   "result.share": "مشاركة",
+  "result.share.copied": "تم نسخ الرابط!",
+  "result.share.copyLink": "نسخ الرابط",
 
   "dashboard.title": "مشاريعي",
   "dashboard.empty": "لا توجد تصاميم بعد. أنشئ أول واحد!",
   "dashboard.create": "تصميم جديد",
+  "dashboard.processing": "الذكاء الاصطناعي يعمل على تصميمك...",
 
   "admin.title": "لوحة الإدارة",
   "admin.companies": "الشركات",
@@ -258,6 +293,25 @@ const ar: Record<string, string> = {
   "admin.disable": "تعطيل",
   "admin.save": "حفظ",
   "admin.cancel": "إلغاء",
+
+  "common.confirm": "تأكيد",
+  "common.cancel": "إلغاء",
+
+  "landing.stats.title": "موثوق من أصحاب المنازل في الإمارات",
+  "landing.stats.designs": "تصاميم تم إنشاؤها",
+  "landing.stats.products": "منتجات حقيقية",
+  "landing.stats.retailers": "متاجر إماراتية",
+  "landing.faq.title": "الأسئلة الشائعة",
+  "landing.faq.q1": "ما مدى دقة التصميم بالذكاء الاصطناعي؟",
+  "landing.faq.a1": "ينشئ ذكاؤنا الاصطناعي تصورات واقعية ويختار منتجات حقيقية من متاجر إماراتية معتمدة. التصور هو دليل مفاهيمي — صور المنتجات الفعلية معروضة على كل بطاقة.",
+  "landing.faq.a2": "نعم! كل بطاقة منتج تحتوي على زر تبديل يتيح لك طلب بديل من نفس الفئة ونطاق السعر.",
+  "landing.faq.q2": "هل يمكنني تبديل المنتجات بعد الإنشاء؟",
+  "landing.faq.q3": "هل الاستخدام مجاني؟",
+  "landing.faq.a3": "نعم، AInterior مجاني خلال فترة الإطلاق. أنشئ تصاميم غير محدودة واستكشف أساليب مختلفة بدون تكلفة.",
+  "landing.footer.about": "حول",
+  "landing.footer.privacy": "الخصوصية",
+  "landing.footer.terms": "الشروط",
+  "landing.footer.contact": "اتصل بنا",
 
   "common.loading": "جارٍ التحميل...",
   "common.error": "حدث خطأ ما",

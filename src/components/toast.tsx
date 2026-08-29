@@ -2,6 +2,7 @@
 
 import { useState, useCallback, createContext, useContext, ReactNode } from "react";
 import { X, AlertTriangle, CheckCircle2, Info } from "lucide-react";
+import { useApp } from "@/components/app-provider";
 
 type ToastType = "success" | "error" | "warning" | "info";
 
@@ -44,6 +45,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     message: string;
     resolve: (v: boolean) => void;
   } | null>(null);
+  const { t } = useApp();
 
   const addToast = useCallback((message: string, type: ToastType = "info") => {
     const id = Date.now().toString(36) + Math.random().toString(36).slice(2);
@@ -112,7 +114,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                 }}
                 className="px-4 py-2 rounded-lg text-sm font-medium text-brand-600 border border-brand-200 hover:bg-brand-50 transition-colors"
               >
-                Cancel
+                {t("common.cancel")}
               </button>
               <button
                 onClick={() => {
@@ -121,7 +123,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                 }}
                 className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition-colors"
               >
-                Confirm
+                {t("common.confirm")}
               </button>
             </div>
           </div>

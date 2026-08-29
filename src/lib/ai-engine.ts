@@ -196,14 +196,16 @@ function filterProducts(
   budgetAed: number,
   requiredCategories: string[]
 ): RawProduct[] {
+  const maxItemPrice = budgetAed * 0.6;
   const rows = db
     .prepare(
       `SELECT p.*, c.name as company_name FROM products p
        JOIN companies c ON p.company_id = c.id
        WHERE p.is_available = 1 AND c.enabled = 1
+         AND p.price_aed <= ?
        ORDER BY p.is_featured DESC, p.price_aed ASC`
     )
-    .all() as RawProduct[];
+    .all(maxItemPrice) as RawProduct[];
 
   return rows.filter((p) => {
     // style_tags is a JSON string in the DB
@@ -218,11 +220,7 @@ function filterProducts(
     try { roomTypes = JSON.parse(p.room_types || "[]"); } catch { roomTypes = []; }
     const matchesRoom = roomTypes.length === 0 || roomTypes.includes(roomType);
 
-    // Budget: single item should not exceed 60% of total budget
-    const maxItemPrice = budgetAed * 0.6;
-    const withinBudget = p.price_aed <= maxItemPrice;
-
-    return matchesStyle && matchesRoom && withinBudget;
+    return matchesStyle && matchesRoom;
   });
 }
 
@@ -580,27 +578,16 @@ export async function runDesignPipeline(params: {
     })
     .filter(Boolean) as (SelectedProduct & { product: Product })[];
 
-  // Stage 4: Visualization
-  const visualizationUrl = await generateVisualization(
-    spaceAnalysis,
-    enriched,
-    params.styleSlug
-  );
-
-  // Stage 5: Total cost (price_aed from raw DB row)
+  // Stage 4 + 5: Visualization and Explanation are independent — run in parallel
   const totalCostAed = enriched.reduce(
     (sum, sp) => sum + ((sp.product as unknown as Record<string, number>).price_aed || 0),
     0
   );
 
-  // Stage 6: Explanation
-  const explanation = await generateExplanation(
-    spaceAnalysis,
-    enriched,
-    params.styleSlug,
-    totalCostAed,
-    params.budgetAed
-  );
+  const [visualizationUrl, explanation] = await Promise.all([
+    generateVisualization(spaceAnalysis, enriched, params.styleSlug),
+    generateExplanation(spaceAnalysis, enriched, params.styleSlug, totalCostAed, params.budgetAed),
+  ]);
 
   // Save results
   db.prepare(

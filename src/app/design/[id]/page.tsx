@@ -18,7 +18,11 @@ import {
   Maximize2,
   Trash2,
   Printer,
+  Share2,
+  Link as LinkIcon,
+  X,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 interface DesignProduct {
   productId: string;
@@ -60,6 +64,7 @@ export default function DesignResultPage() {
   const router = useRouter();
   const { t, currency } = useApp();
   const { toast, confirm } = useToast();
+  const { data: session, status } = useSession();
   const id = params.id as string;
 
   const [design, setDesign] = useState<Design | null>(null);
@@ -69,6 +74,28 @@ export default function DesignResultPage() {
   const [vizError, setVizError] = useState(false);
   const [vizLoaded, setVizLoaded] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    if (status === "unauthenticated") router.push(`/login?callbackUrl=/design/${id}`);
+  }, [status, router, id]);
+
+  useEffect(() => {
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape" && vizExpanded) setVizExpanded(false);
+    }
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [vizExpanded]);
+
+  async function handleShare() {
+    const url = window.location.href;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast(t("result.share.copied"), "success");
+    } catch {
+      toast("Could not copy link", "error");
+    }
+  }
 
   useEffect(() => {
     async function load() {
@@ -164,7 +191,7 @@ export default function DesignResultPage() {
             className="absolute top-4 right-4 bg-white/20 hover:bg-white/40 text-white rounded-full p-2 transition-colors"
             onClick={() => setVizExpanded(false)}
           >
-            <ArrowLeft className="w-5 h-5 rotate-45" />
+            <X className="w-5 h-5" />
           </button>
         </div>
       )}
@@ -201,7 +228,14 @@ export default function DesignResultPage() {
               {t("result.title")}
             </h1>
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
+            <button
+              onClick={handleShare}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm border border-brand-200 text-brand-600 hover:bg-brand-50 transition-colors"
+            >
+              <Share2 className="w-3.5 h-3.5" />
+              {t("result.share")}
+            </button>
             <button
               onClick={() => window.open(`/api/designs/${id}/export`, '_blank')}
               className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm border border-brand-200 text-brand-600 hover:bg-brand-50 transition-colors"

@@ -3,8 +3,10 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import db from "@/lib/db";
 import { generateId } from "@/lib/utils";
+import { styles } from "@/lib/styles";
 
-const VALID_ROOM_TYPES = ["bedroom", "living_room", "dining_room", "office", "bathroom", "kitchen"];
+const VALID_ROOM_TYPES = ["bedroom", "living_room", "dining_room", "office", "studio", "kids_room"];
+const VALID_STYLES = styles.map((s) => s.slug);
 
 // GET /api/designs — List user's designs (paginated)
 export async function GET(req: NextRequest) {
@@ -85,11 +87,21 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    if (typeof styleSlug !== "string" || styleSlug.length > 50) {
+    if (typeof styleSlug !== "string" || styleSlug.length > 50 || !VALID_STYLES.includes(styleSlug)) {
       return NextResponse.json(
-        { error: "Invalid style" },
+        { error: `Invalid style. Must be one of: ${VALID_STYLES.join(", ")}` },
         { status: 400 }
       );
+    }
+    // Optional field validation
+    if (roomHeightCm != null) {
+      const h = Number(roomHeightCm);
+      if (!h || h < 150 || h > 600) {
+        return NextResponse.json({ error: "Height must be between 150cm and 600cm" }, { status: 400 });
+      }
+    }
+    if (additionalRequirements && typeof additionalRequirements === "string" && additionalRequirements.length > 2000) {
+      return NextResponse.json({ error: "Requirements text must be under 2000 characters" }, { status: 400 });
     }
 
     const id = generateId();
@@ -106,13 +118,13 @@ export async function POST(req: NextRequest) {
       userId,
       roomType,
       roomImageUrl || null,
-      roomLengthCm,
-      roomWidthCm,
-      roomHeightCm || null,
+      lengthNum,
+      widthNum,
+      roomHeightCm ? Number(roomHeightCm) : null,
       existingFurniture || null,
       additionalRequirements || null,
       styleSlug,
-      budgetAed,
+      budgetNum,
       budgetTier || "moderate"
     );
 

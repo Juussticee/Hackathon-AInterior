@@ -11,7 +11,9 @@ import {
   Plus,
   ToggleLeft,
   ToggleRight,
+  Trash2,
 } from "lucide-react";
+import { useToast } from "@/components/toast";
 
 interface Company {
   id: string;
@@ -35,6 +37,7 @@ export default function AdminPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const { t } = useApp();
+  const { toast } = useToast();
   const [tab, setTab] = useState<"companies" | "products">("companies");
   const [companies, setCompanies] = useState<Company[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -163,6 +166,38 @@ export default function AdminPage() {
       }
     } catch {
       setFormError("Network error. Please try again.");
+    }
+  }
+
+  async function toggleProduct(id: string, current: number) {
+    try {
+      const res = await fetch(`/api/admin/products/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isAvailable: !current }),
+      });
+      if (res.ok) {
+        setProducts((prev) =>
+          prev.map((p) =>
+            p.id === id ? { ...p, is_available: current ? 0 : 1 } : p
+          )
+        );
+        toast(current ? "Product disabled" : "Product enabled", "success");
+      }
+    } catch {
+      toast("Failed to update product", "error");
+    }
+  }
+
+  async function deleteProduct(id: string) {
+    try {
+      const res = await fetch(`/api/admin/products/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setProducts((prev) => prev.filter((p) => p.id !== id));
+        toast("Product deleted", "success");
+      }
+    } catch {
+      toast("Failed to delete product", "error");
     }
   }
 
@@ -431,15 +466,26 @@ export default function AdminPage() {
                     {p.price_aed.toLocaleString()}
                   </p>
                 </div>
-                <span
-                  className={`text-xs px-2 py-0.5 rounded-full ${
-                    p.is_available
-                      ? "bg-green-50 text-green-600"
-                      : "bg-red-50 text-red-600"
+                <button
+                  onClick={() => toggleProduct(p.id, p.is_available)}
+                  className={`p-1.5 rounded-lg hover:bg-brand-50 transition-colors ${
+                    p.is_available ? "text-green-500" : "text-red-400"
                   }`}
+                  title={p.is_available ? "Disable product" : "Enable product"}
                 >
-                  {p.is_available ? "Active" : "Unavailable"}
-                </span>
+                  {p.is_available ? (
+                    <ToggleRight className="w-5 h-5" />
+                  ) : (
+                    <ToggleLeft className="w-5 h-5" />
+                  )}
+                </button>
+                <button
+                  onClick={() => deleteProduct(p.id)}
+                  className="p-1.5 rounded-lg hover:bg-red-50 text-red-400 hover:text-red-600 transition-colors"
+                  title="Delete product"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
               </div>
             ))}
             {products.length > 50 && (

@@ -9,7 +9,10 @@ import {
   ShoppingBag,
   ArrowRight,
   CheckCircle2,
+  Star,
+  ChevronDown,
 } from "lucide-react";
+import { styles } from "@/lib/styles";
 
 export default function LandingPage() {
   const { t } = useApp();
@@ -161,27 +164,15 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {[
-              {
-                name: t("wizard.style.minimalist"),
-                desc: "Clean lines, neutral tones, and purposeful pieces. Every item earns its place.",
-                img: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=600&q=80",
-                colors: ["#FFFFFF", "#F5F5F5", "#212121", "#616161"],
-              },
-              {
-                name: t("wizard.style.japandi"),
-                desc: "Japanese wabi-sabi meets Scandinavian hygge. Natural materials and serene simplicity.",
-                img: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=600&q=80",
-                colors: ["#F5F0EB", "#D4C5B5", "#8B7355", "#4A4035"],
-              },
-            ].map((style, i) => (
-              <div
-                key={i}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {styles.map((style, i) => (
+              <Link
+                key={style.slug}
+                href="/design/new"
                 className="group relative rounded-2xl overflow-hidden aspect-[4/5] cursor-pointer"
               >
                 <img
-                  src={style.img}
+                  src={style.heroImageUrl}
                   alt={style.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   onError={(e) => {
@@ -192,11 +183,11 @@ export default function LandingPage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-brand-900/80 via-brand-900/20 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-6">
                   <h3 className="text-2xl font-bold text-white mb-2">
-                    {style.name}
+                    {t(`wizard.style.${style.slug}` as any) || style.name}
                   </h3>
-                  <p className="text-white/80 text-sm mb-3">{style.desc}</p>
+                  <p className="text-white/80 text-sm mb-3 line-clamp-2">{style.description}</p>
                   <div className="flex gap-2">
-                    {style.colors.map((color, j) => (
+                    {style.colorPalette.primary.slice(0, 4).map((color, j) => (
                       <div
                         key={j}
                         className="w-6 h-6 rounded-full border-2 border-white/50"
@@ -205,7 +196,7 @@ export default function LandingPage() {
                     ))}
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
@@ -253,6 +244,56 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ---- SOCIAL PROOF STATS ---- */}
+      <section className="py-16 sm:py-20 bg-white">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+          <p className="text-center text-sm font-medium text-brand-400 uppercase tracking-wide mb-8">
+            {t("landing.stats.title")}
+          </p>
+          <div className="grid grid-cols-3 gap-6 text-center">
+            {[
+              { value: "124+", label: t("landing.stats.products") },
+              { value: "3", label: t("landing.stats.retailers") },
+              { value: "6", label: "Design Styles" },
+            ].map((stat) => (
+              <div key={stat.label}>
+                <p className="text-3xl sm:text-4xl font-bold text-brand-800">{stat.value}</p>
+                <p className="text-sm text-brand-500 mt-1">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ---- FAQ ---- */}
+      <section className="py-20 sm:py-28 bg-brand-50">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl sm:text-4xl font-bold text-brand-900 text-center mb-12">
+            {t("landing.faq.title")}
+          </h2>
+          <div className="space-y-4">
+            {[
+              { q: t("landing.faq.q1"), a: t("landing.faq.a1") },
+              { q: t("landing.faq.q2"), a: t("landing.faq.a2") },
+              { q: t("landing.faq.q3"), a: t("landing.faq.a3") },
+            ].map((faq, i) => (
+              <details
+                key={i}
+                className="bg-white border border-brand-100 rounded-xl group"
+              >
+                <summary className="flex items-center justify-between px-6 py-4 cursor-pointer text-brand-800 font-medium text-sm sm:text-base list-none">
+                  {faq.q}
+                  <ChevronDown className="w-4 h-4 text-brand-400 transition-transform group-open:rotate-180 flex-shrink-0 ml-2" />
+                </summary>
+                <p className="px-6 pb-4 text-sm text-brand-500 leading-relaxed">
+                  {faq.a}
+                </p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ---- CTA ---- */}
       <section className="py-20 sm:py-28 bg-brand-800">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
@@ -280,6 +321,12 @@ export default function LandingPage() {
               A
             </span>
             <span>AInterior</span>
+          </div>
+          <div className="flex items-center gap-6 text-brand-500 text-xs">
+            <span>{t("landing.footer.about")}</span>
+            <span>{t("landing.footer.privacy")}</span>
+            <span>{t("landing.footer.terms")}</span>
+            <span>{t("landing.footer.contact")}</span>
           </div>
           <p className="text-brand-500 text-xs">
             &copy; 2026 AInterior. AI-powered interior design.

@@ -27,17 +27,55 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (status === "authenticated") {
-      fetch("/api/designs")
-        .then((r) => r.json())
-        .then((data) => setDesigns(data.designs || []))
-        .catch(() => { setDesigns([]); setLoadError(true); });
+      loadDesigns();
     }
   }, [status]);
 
+  // Auto-refresh if any design is in "processing" state
+  useEffect(() => {
+    if (!designs) return;
+    const hasProcessing = designs.some((d) => String(d.status) === "processing");
+    if (!hasProcessing) return;
+    const timer = setInterval(() => loadDesigns(), 5000);
+    return () => clearInterval(timer);
+  }, [designs]);
+
+  async function loadDesigns() {
+    try {
+      const r = await fetch("/api/designs");
+      const data = await r.json();
+      setDesigns(data.designs || []);
+      setLoadError(false);
+    } catch {
+      setDesigns([]);
+      setLoadError(true);
+    }
+  }
+
   if (status === "loading" || designs === null) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
-        <Loader2 className="w-6 h-6 text-brand-600 animate-spin" />
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:py-12">
+        <div className="animate-pulse space-y-6">
+          <div className="flex justify-between items-center">
+            <div className="space-y-2">
+              <div className="h-8 w-48 bg-brand-100 rounded-lg" />
+              <div className="h-4 w-32 bg-brand-50 rounded" />
+            </div>
+            <div className="h-10 w-32 bg-brand-100 rounded-lg" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-white rounded-xl border border-brand-100 overflow-hidden">
+                <div className="aspect-[16/10] bg-brand-50 animate-pulse" />
+                <div className="p-4 space-y-2">
+                  <div className="h-3 w-24 bg-brand-50 rounded" />
+                  <div className="h-4 w-36 bg-brand-100 rounded" />
+                  <div className="h-3 w-20 bg-brand-50 rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
@@ -99,8 +137,11 @@ export default function DashboardPage() {
       </div>
 
       {loadError && (
-        <div className="mb-6 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
-          Failed to load your designs. Please refresh the page.
+        <div className="mb-6 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 flex items-center justify-between">
+          <span>Failed to load your designs. Please try again.</span>
+          <button onClick={loadDesigns} className="text-red-600 hover:text-red-800 font-medium text-xs ml-4">
+            {t("common.retry")}
+          </button>
         </div>
       )}
 
@@ -158,7 +199,7 @@ export default function DashboardPage() {
                   <div className="flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1">
                     {statusIcon(String(d.status ?? ""))}
                     <span className="text-xs text-brand-600 capitalize">
-                      {String(d.status ?? "")}
+                      {String(d.status) === "processing" ? t("dashboard.processing") : String(d.status ?? "")}
                     </span>
                   </div>
                 </div>
