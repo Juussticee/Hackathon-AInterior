@@ -486,7 +486,7 @@ export default function NewDesignPage() {
                       {
                         slug: "japandi" as const,
                         name: t("wizard.style.japandi"),
-                        img: "https://images.unsplash.com/photo-1616486338812-3dadae5b4ace?w=400&q=80",
+                        img: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=400&q=80",
                         desc: "Natural materials, serene simplicity, warm neutrals",
                         keywords: ["Oak", "Linen", "Ceramic", "Rattan"],
                       },
@@ -505,6 +505,10 @@ export default function NewDesignPage() {
                           src={s.img}
                           alt={s.name}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src =
+                              "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&q=80";
+                          }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-brand-900/75 to-transparent" />
                         <div className="absolute bottom-3 left-3 right-3 text-left">

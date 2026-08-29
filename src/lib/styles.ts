@@ -40,7 +40,7 @@ export const japandiStyle: StyleProfile = {
   description:
     "Where Japanese wabi-sabi meets Scandinavian hygge. Natural materials, warm neutrals, organic textures, and serene simplicity create a calm sanctuary.",
   heroImageUrl:
-    "https://images.unsplash.com/photo-1616486338812-3dadae5b4ace?w=1200&q=80",
+    "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1200&q=80",
   colorPalette: {
     primary: ["#F5F0EB", "#E8DDD3", "#D4C5B5", "#C4A882"],
     accent: ["#8B7355", "#6B5B45", "#4A4035", "#2C2418"],

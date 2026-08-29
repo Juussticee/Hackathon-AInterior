@@ -59,9 +59,13 @@ export default function LandingPage() {
           <div className="mt-16 sm:mt-20 max-w-5xl mx-auto">
             <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-brand-200/50 aspect-[16/9]">
               <img
-                src="https://images.unsplash.com/photo-1616486338812-3dadae5b4ace?w=1400&q=80"
+                src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1400&q=80"
                 alt="Beautiful Japandi interior"
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src =
+                    "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=1400&q=80";
+                }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-brand-900/30 via-transparent to-transparent" />
               <div className="absolute bottom-6 left-6 right-6">
@@ -123,6 +127,10 @@ export default function LandingPage() {
                     src={step.img}
                     alt={step.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src =
+                        "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&q=80";
+                    }}
                   />
                   <div className="absolute top-3 left-3 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-brand-700 font-bold text-sm">
                     {i + 1}
@@ -164,7 +172,7 @@ export default function LandingPage() {
               {
                 name: t("wizard.style.japandi"),
                 desc: "Japanese wabi-sabi meets Scandinavian hygge. Natural materials and serene simplicity.",
-                img: "https://images.unsplash.com/photo-1616486338812-3dadae5b4ace?w=600&q=80",
+                img: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=600&q=80",
                 colors: ["#F5F0EB", "#D4C5B5", "#8B7355", "#4A4035"],
               },
             ].map((style, i) => (
@@ -176,6 +184,10 @@ export default function LandingPage() {
                   src={style.img}
                   alt={style.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src =
+                      "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&q=80";
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-brand-900/80 via-brand-900/20 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-6">
