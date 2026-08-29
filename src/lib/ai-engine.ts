@@ -13,7 +13,7 @@ import type {
   Product,
   RoomType,
 } from "@/lib/types";
-import { readFileSync, existsSync } from "fs";
+import { readFileSync, existsSync, writeFileSync, mkdirSync } from "fs";
 import path from "path";
 
 // Read key from env — the correct key is set in .env.local as AINTERIOR_GEMINI_KEY
@@ -343,43 +343,58 @@ export async function generateVisualization(
   const style = getStyleBySlug(styleSlug);
   if (!style) return null;
 
-  const furnitureList = selectedProducts
-    .slice(0, 6)
-    .map((sp) => {
-      let colors: string[] = [];
-      try {
-        colors = JSON.parse((sp.product as unknown as Record<string,string>).colors || "[]");
-      } catch { colors = []; }
-      return `${sp.product.name} in ${colors[0] || "neutral"}`;
-    })
+  // Build a concise prompt — shorter prompts generate faster and more reliably
+  const keyProducts = selectedProducts
+    .slice(0, 4)
+    .map((sp) => sp.product.name)
     .join(", ");
 
   const prompt = [
     `Professional interior design photograph of a ${spaceAnalysis.roomType.replace("_", " ")}`,
-    `${style.name} style interior design`,
-    `${spaceAnalysis.estimatedAreaSqm.toFixed(0)} sqm room`,
-    `${spaceAnalysis.floorType !== "unknown" ? spaceAnalysis.floorType + " flooring" : ""}`,
-    `Color palette: ${style.colorPalette.primary.slice(0, 3).join(", ")}`,
-    `Featuring: ${furnitureList}`,
-    "photorealistic, magazine quality, professional staging, soft natural lighting",
-    "ultra detailed, 8k, architectural photography",
+    `${style.name} style`,
+    `${spaceAnalysis.estimatedAreaSqm.toFixed(0)} sqm`,
+    `furniture: ${keyProducts}`,
+    "photorealistic, magazine quality, soft natural lighting, 8k",
   ]
     .filter(Boolean)
     .join(", ");
 
   try {
-    // Pollinations.ai — free image generation, no API key needed
     const encoded = encodeURIComponent(prompt);
-    // Use a fixed seed derived from the prompt for consistency
     const seed = Math.abs(prompt.split("").reduce((a, c) => a + c.charCodeAt(0), 0)) % 100000;
-    const url = `https://image.pollinations.ai/prompt/${encoded}?width=1344&height=768&model=flux&seed=${seed}&nologo=true`;
+    const pollinationsUrl = `https://image.pollinations.ai/prompt/${encoded}?width=1344&height=768&model=flux&seed=${seed}&nologo=true`;
 
-    // Verify the URL is reachable by fetching just the headers
-    const check = await fetch(url, { method: "HEAD" });
-    if (check.ok || check.status === 200) {
-      return url;
+    // Pre-fetch server-side: Pollinations returns 200 with empty body while generating.
+    // We must wait for actual image bytes before returning.
+    const maxAttempts = 6;
+    const delayMs = 8000; // 8 seconds between retries
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      console.log(`[viz] Attempt ${attempt}/${maxAttempts} fetching Pollinations image...`);
+      const res = await fetch(pollinationsUrl);
+      const buf = await res.arrayBuffer();
+
+      if (res.ok && buf.byteLength > 1000) {
+        // Got a real image — save locally so browser can load it instantly
+        const uploadsDir = path.join(process.cwd(), "public", "uploads");
+        if (!existsSync(uploadsDir)) mkdirSync(uploadsDir, { recursive: true });
+
+        const filename = `viz-${Date.now()}-${seed}.jpg`;
+        const filePath = path.join(uploadsDir, filename);
+        writeFileSync(filePath, Buffer.from(buf));
+        console.log(`[viz] Saved ${filename} (${(buf.byteLength / 1024).toFixed(0)} KB)`);
+        return `/uploads/${filename}`;
+      }
+
+      console.log(`[viz] Got ${buf.byteLength} bytes (attempt ${attempt}), waiting ${delayMs / 1000}s...`);
+      // Wait before retrying — image is still generating on Pollinations side
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
-    return url; // Return URL anyway — Pollinations is reliable
+
+    // All retries exhausted — return the Pollinations URL as fallback.
+    // The browser may still load it if it finishes generating.
+    console.warn("[viz] Pre-fetch exhausted, returning Pollinations URL as fallback");
+    return pollinationsUrl;
   } catch (error) {
     console.error("Visualization generation error:", error);
     return null;
