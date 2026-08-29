@@ -155,6 +155,22 @@ export default function NewDesignPage() {
       return;
     }
 
+    // Client-side validation guard — prevents sending malformed data
+    const lenNum = Number(roomLength);
+    const widNum = Number(roomWidth);
+    if (!roomLength || !roomWidth || lenNum < 100 || widNum < 100) {
+      setError("Please go back and fill in valid room dimensions (min 100 cm).");
+      return;
+    }
+    if (!style) {
+      setError("Please go back and select a design style.");
+      return;
+    }
+    if (budget <= 0) {
+      setError("Please go back and set a valid budget.");
+      return;
+    }
+
     setLoading(true);
     setError("");
     setProcessingStageIdx(0);
@@ -163,25 +179,30 @@ export default function NewDesignPage() {
       const budgetTier =
         budget < 3000 ? "economy" : budget < 8000 ? "moderate" : "premium";
 
+      const payload = {
+        roomType,
+        roomImageUrl: roomImageUrl || null,
+        roomLengthCm: lenNum,
+        roomWidthCm: widNum,
+        roomHeightCm: roomHeight ? Number(roomHeight) : null,
+        existingFurniture: existingFurniture || null,
+        additionalRequirements: requirements || null,
+        styleSlug: style,
+        budgetAed: budget,
+        budgetTier,
+      };
+
       // Create design project
       const createRes = await fetch("/api/designs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          roomType,
-          roomImageUrl: roomImageUrl || null,
-          roomLengthCm: Number(roomLength),
-          roomWidthCm: Number(roomWidth),
-          roomHeightCm: roomHeight ? Number(roomHeight) : null,
-          existingFurniture: existingFurniture || null,
-          additionalRequirements: requirements || null,
-          styleSlug: style,
-          budgetAed: budget,
-          budgetTier,
-        }),
+        body: JSON.stringify(payload),
       });
 
-      if (!createRes.ok) throw new Error("Failed to create design");
+      if (!createRes.ok) {
+        const errData = await createRes.json().catch(() => ({}));
+        throw new Error(errData.error || "Failed to create design");
+      }
       const { id } = await createRes.json();
 
       // Trigger AI pipeline
@@ -709,8 +730,8 @@ export default function NewDesignPage() {
               ) : (
                 <button
                   onClick={handleSubmit}
-                  disabled={loading}
-                  className="flex items-center gap-2 bg-brand-600 hover:bg-brand-700 disabled:bg-brand-300 disabled:cursor-wait text-white px-7 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm"
+                  disabled={loading || !canProceedStep1 || !canProceedStep2 || !style}
+                  className="flex items-center gap-2 bg-brand-600 hover:bg-brand-700 disabled:bg-brand-200 disabled:text-brand-400 disabled:cursor-not-allowed text-white px-7 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm"
                 >
                   <Sparkles className="w-4 h-4" />
                   {t("wizard.submit")}

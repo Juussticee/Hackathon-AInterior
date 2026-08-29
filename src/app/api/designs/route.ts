@@ -58,9 +58,15 @@ export async function POST(req: NextRequest) {
       budgetTier,
     } = body;
 
-    if (!roomType || !roomLengthCm || !roomWidthCm || !styleSlug || !budgetAed) {
+    const missing: string[] = [];
+    if (!roomType) missing.push("roomType");
+    if (!roomLengthCm) missing.push("roomLengthCm");
+    if (!roomWidthCm) missing.push("roomWidthCm");
+    if (!styleSlug) missing.push("styleSlug");
+    if (!budgetAed) missing.push("budgetAed");
+    if (missing.length > 0) {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        { error: `Missing required fields: ${missing.join(", ")}` },
         { status: 400 }
       );
     }
