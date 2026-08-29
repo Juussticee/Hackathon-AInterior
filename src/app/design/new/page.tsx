@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useApp } from "@/components/app-provider";
 import {
@@ -17,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 import type { RoomType } from "@/lib/types";
+import { styles as allStyles } from "@/lib/styles";
 
 const ROOM_TYPES: { value: RoomType; label: string; labelAr: string }[] = [
   { value: "bedroom", label: "Bedroom", labelAr: "غرفة نوم" },
@@ -61,11 +62,20 @@ export default function NewDesignPage() {
   const [existingFurniture, setExistingFurniture] = useState("");
 
   // Step 2: Style & Budget
-  const [style, setStyle] = useState<"minimalist" | "japandi">("japandi");
+  const searchParams = useSearchParams();
+  const initialStyle = searchParams.get("style") || "japandi";
+  const [style, setStyle] = useState<string>(initialStyle);
   const [budget, setBudget] = useState(5000);
 
   // Step 3: Requirements
   const [requirements, setRequirements] = useState("");
+
+  // Sync style state when query param changes
+  useEffect(() => {
+    const s = searchParams.get("style");
+    if (s && s !== style) setStyle(s);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -497,23 +507,8 @@ export default function NewDesignPage() {
                   <label className="block text-sm font-medium text-brand-700 mb-3">
                     {t("wizard.style.title")}
                   </label>
-                  <div className="grid grid-cols-2 gap-4">
-                    {[
-                      {
-                        slug: "minimalist" as const,
-                        name: t("wizard.style.minimalist"),
-                        img: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=400&q=80",
-                        desc: "Clean lines, neutral tones, purposeful pieces",
-                        keywords: ["White", "Grey", "Black", "Clean"],
-                      },
-                      {
-                        slug: "japandi" as const,
-                        name: t("wizard.style.japandi"),
-                        img: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=400&q=80",
-                        desc: "Natural materials, serene simplicity, warm neutrals",
-                        keywords: ["Oak", "Linen", "Ceramic", "Rattan"],
-                      },
-                    ].map((s) => (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    {allStyles.map((s) => (
                       <button
                         key={s.slug}
                         type="button"
@@ -525,7 +520,7 @@ export default function NewDesignPage() {
                         }`}
                       >
                         <img
-                          src={s.img}
+                          src={s.heroImageUrl}
                           alt={s.name}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           onError={(e) => {
@@ -536,10 +531,10 @@ export default function NewDesignPage() {
                         <div className="absolute inset-0 bg-gradient-to-t from-brand-900/75 to-transparent" />
                         <div className="absolute bottom-3 left-3 right-3 text-left">
                           <h3 className="text-white font-semibold text-sm mb-1">
-                            {s.name}
+                            {t(`wizard.style.${s.slug}` as any) || s.name}
                           </h3>
-                          <p className="text-white/70 text-xs leading-snug">
-                            {s.desc}
+                          <p className="text-white/70 text-xs leading-snug line-clamp-2">
+                            {s.description}
                           </p>
                         </div>
                         {style === s.slug && (
@@ -664,7 +659,7 @@ export default function NewDesignPage() {
                         ROOM_TYPES.find((r) => r.value === roomType)?.label,
                       ],
                       ["Size", `${roomLength} × ${roomWidth} cm`],
-                      ["Style", style.charAt(0).toUpperCase() + style.slice(1)],
+                      ["Style", t(`wizard.style.${style}` as any) || style.charAt(0).toUpperCase() + style.slice(1)],
                       ["Budget", `AED ${budget.toLocaleString()}`],
                     ].map(([key, val]) => (
                       <div key={key} className="contents">

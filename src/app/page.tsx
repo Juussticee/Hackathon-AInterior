@@ -168,7 +168,7 @@ export default function LandingPage() {
             {styles.map((style, i) => (
               <Link
                 key={style.slug}
-                href="/design/new"
+                href={`/design/new?style=${style.slug}`}
                 className="group relative rounded-2xl overflow-hidden aspect-[4/5] cursor-pointer"
               >
                 <img
