@@ -323,16 +323,39 @@ function filterProducts(
   // First attempt: style + room + category
   const strict = rows.filter((p) => matchStyle(p) && matchRoomCat(p));
 
-  // Fallback: if style is too restrictive (new styles with no tagged products),
-  // relax the style filter and use room + category only
+  // Fallback 1: if style is too restrictive (new styles with no tagged products),
+  // relax the style filter but keep room + category
   if (strict.length < 5) {
     const relaxed = rows.filter(matchRoomCat);
-    if (relaxed.length > strict.length) {
+    if (relaxed.length >= 5) {
       console.warn(
         `[filterProducts] Style "${styleSlug}" matched only ${strict.length} products, ` +
         `falling back to room+category filter (${relaxed.length} candidates)`
       );
       return relaxed;
+    }
+
+    // Fallback 2: room has no tagged products (e.g. studio, kids_room)
+    // Drop room filter, keep category + style
+    const noRoom = rows.filter((p) => {
+      const sub = (p.subcategory || "").toLowerCase().replace(/\s+/g, "-");
+      const matchesCategory = !hasCatFilter || expandedCats.has(sub);
+      return matchStyle(p) && matchesCategory;
+    });
+    if (noRoom.length >= 5) {
+      console.warn(
+        `[filterProducts] Room "${roomType}" has no tagged products, ` +
+        `falling back to style+category filter (${noRoom.length} candidates)`
+      );
+      return noRoom;
+    }
+
+    // Fallback 3: drop all filters except price — use entire catalog
+    if (rows.length > 0) {
+      console.warn(
+        `[filterProducts] All filters exhausted, returning full catalog (${rows.length} candidates)`
+      );
+      return rows;
     }
   }
 
@@ -450,11 +473,29 @@ Return ONLY valid JSON (no markdown):
       generationConfig: { responseMimeType: "application/json" },
     });
 
-    const result = await withTimeout(
-      model.generateContent(prompt),
-      60_000,
-      "Product selection"
-    );
+    // Retry up to 2 times on 429 rate-limit errors (free tier: 20 RPD)
+    let result;
+    let lastError: unknown;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        result = await withTimeout(model.generateContent(prompt), 60_000, "Product selection");
+        break;
+      } catch (err) {
+        lastError = err;
+        const msg = err instanceof Error ? err.message : String(err);
+        const is429 = msg.includes("429") || msg.toLowerCase().includes("quota") || msg.toLowerCase().includes("rate");
+        if (is429 && attempt < 3) {
+          // Extract retry-after from error or use exponential back-off
+          const retryMatch = msg.match(/(\d+(?:\.\d+)?)s/);
+          const waitMs = retryMatch ? Math.min(parseFloat(retryMatch[1]) * 1000, 60_000) : attempt * 15_000;
+          console.warn(`[selectProducts] Gemini 429 on attempt ${attempt}, retrying in ${(waitMs/1000).toFixed(0)}s...`);
+          await new Promise(r => setTimeout(r, waitMs));
+        } else {
+          throw err;
+        }
+      }
+    }
+    if (!result) throw lastError;
     const text = result.response.text().trim();
     const jsonText = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
     const parsed = JSON.parse(jsonText);
@@ -500,9 +541,65 @@ Return ONLY valid JSON (no markdown):
 
     return selected;
   } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    const is429 = msg.includes("429") || msg.toLowerCase().includes("quota");
+
+    if (is429) {
+      // Gemini quota exhausted for today — deterministically pick top products per style category
+      console.warn("[selectProducts] Gemini quota exhausted, using deterministic fallback selector");
+      return deterministicSelect(finalCandidates, styleCategories, budgetAed);
+    }
+
     console.error("Product selection error:", error);
     throw error;
   }
+}
+
+/**
+ * Deterministic product selection used when Gemini is unavailable.
+ * Picks the highest-value featured products per style category up to budget.
+ */
+function deterministicSelect(
+  candidates: RawProduct[],
+  styleCategories: string[],
+  budgetAed: number
+): SelectedProduct[] {
+  const selected: SelectedProduct[] = [];
+  let remaining = budgetAed;
+  const usedIds = new Set<string>();
+
+  // First pass: pick one product per style category
+  for (const cat of styleCategories) {
+    const synonyms = expandCategories([cat]);
+    const match = candidates.find((p) => {
+      const sub = (p.subcategory || "").toLowerCase().replace(/\s+/g, "-");
+      return synonyms.has(sub) && !usedIds.has(p.id) && p.price_aed <= remaining * 0.6;
+    });
+    if (match) {
+      selected.push({ productId: match.id, reason: `Selected as ${cat} for this room`, category: cat });
+      usedIds.add(match.id);
+      remaining -= match.price_aed;
+    }
+  }
+
+  // Second pass: fill to 6 items with featured products
+  for (const p of candidates) {
+    if (selected.length >= 6) break;
+    if (!usedIds.has(p.id) && p.price_aed <= remaining * 0.5) {
+      const sub = (p.subcategory || "").toLowerCase();
+      selected.push({ productId: p.id, reason: `Complementary piece: ${sub}`, category: sub });
+      usedIds.add(p.id);
+      remaining -= p.price_aed;
+    }
+  }
+
+  if (selected.length === 0 && candidates.length > 0) {
+    // Last resort: just return first 5 affordable candidates
+    const affordable = candidates.filter(p => p.price_aed <= budgetAed * 0.3).slice(0, 5);
+    affordable.forEach(p => selected.push({ productId: p.id, reason: "Curated selection", category: p.subcategory || "furniture" }));
+  }
+
+  return selected;
 }
 
 // ================================================================
