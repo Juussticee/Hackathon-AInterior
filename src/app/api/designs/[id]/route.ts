@@ -136,19 +136,26 @@ export async function POST(
   }
 
   try {
-    const result = await runDesignPipeline({
-      projectId: id,
-      roomImageUrl: design.room_image_url as string | null,
-      roomType: design.room_type as RoomType,
-      dimensions: {
-        length: design.room_length_cm as number,
-        width: design.room_width_cm as number,
-        height: design.room_height_cm as number | undefined,
-      },
-      styleSlug: design.style_slug as string,
-      budgetAed: design.budget_aed as number,
-      additionalRequirements: design.additional_requirements as string | null,
-    });
+    // Overall pipeline timeout: 3 minutes max (covers Gemini + Pollinations calls)
+    const PIPELINE_TIMEOUT_MS = 180_000;
+    const result = await Promise.race([
+      runDesignPipeline({
+        projectId: id,
+        roomImageUrl: design.room_image_url as string | null,
+        roomType: design.room_type as RoomType,
+        dimensions: {
+          length: design.room_length_cm as number,
+          width: design.room_width_cm as number,
+          height: design.room_height_cm as number | undefined,
+        },
+        styleSlug: design.style_slug as string,
+        budgetAed: design.budget_aed as number,
+        additionalRequirements: design.additional_requirements as string | null,
+      }),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("Pipeline timed out after 3 minutes")), PIPELINE_TIMEOUT_MS)
+      ),
+    ]);
 
     return NextResponse.json(result);
   } catch (error) {

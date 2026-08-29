@@ -29,6 +29,16 @@ if (!GEMINI_API_KEY) {
 
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
+/** Race a promise against a timeout — prevents pipeline hangs on flaky APIs */
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error(`${label} timed out after ${ms / 1000}s`)), ms)
+    ),
+  ]);
+}
+
 // Safety settings — relaxed for interior design content
 const safetySettings = [
   { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
@@ -132,7 +142,11 @@ Return ONLY valid JSON (no markdown, no explanation) with this exact structure:
       parts.push({ inlineData: { mimeType: ct.split(";")[0], data: buf.toString("base64") } });
     }
 
-    const result = await model.generateContent({ contents: [{ role: "user", parts }] });
+    const result = await withTimeout(
+      model.generateContent({ contents: [{ role: "user", parts }] }),
+      30_000,
+      "Space analysis"
+    );
     const text = result.response.text().trim();
 
     // Strip markdown code fences if present
@@ -436,7 +450,11 @@ Return ONLY valid JSON (no markdown):
       generationConfig: { responseMimeType: "application/json" },
     });
 
-    const result = await model.generateContent(prompt);
+    const result = await withTimeout(
+      model.generateContent(prompt),
+      60_000,
+      "Product selection"
+    );
     const text = result.response.text().trim();
     const jsonText = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
     const parsed = JSON.parse(jsonText);
@@ -587,27 +605,31 @@ export async function generateVisualization(
 
     // Pre-fetch server-side: Pollinations returns 200 with empty body while generating.
     // We must wait for actual image bytes before returning.
-    const maxAttempts = 6;
+    const maxAttempts = 4;
     const delayMs = 8000; // 8 seconds between retries
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       console.log(`[viz] Attempt ${attempt}/${maxAttempts} fetching Pollinations image...`);
-      const res = await fetch(pollinationsUrl);
-      const buf = await res.arrayBuffer();
+      try {
+        const res = await withTimeout(fetch(pollinationsUrl), 30_000, `Pollinations fetch (attempt ${attempt})`);
+        const buf = await withTimeout(res.arrayBuffer(), 15_000, "Pollinations read");
 
-      if (res.ok && buf.byteLength > 1000) {
-        // Got a real image — save locally so browser can load it instantly
-        const uploadsDir = path.join(process.cwd(), "public", "uploads");
-        if (!existsSync(uploadsDir)) mkdirSync(uploadsDir, { recursive: true });
+        if (res.ok && buf.byteLength > 1000) {
+          // Got a real image — save locally so browser can load it instantly
+          const uploadsDir = path.join(process.cwd(), "public", "uploads");
+          if (!existsSync(uploadsDir)) mkdirSync(uploadsDir, { recursive: true });
 
-        const filename = `viz-${Date.now()}-${seed}.jpg`;
-        const filePath = path.join(uploadsDir, filename);
-        writeFileSync(filePath, Buffer.from(buf));
-        console.log(`[viz] Saved ${filename} (${(buf.byteLength / 1024).toFixed(0)} KB)`);
-        return `/uploads/${filename}`;
+          const filename = `viz-${Date.now()}-${seed}.jpg`;
+          const filePath = path.join(uploadsDir, filename);
+          writeFileSync(filePath, Buffer.from(buf));
+          console.log(`[viz] Saved ${filename} (${(buf.byteLength / 1024).toFixed(0)} KB)`);
+          return `/uploads/${filename}`;
+        }
+
+        console.log(`[viz] Got ${buf.byteLength} bytes (attempt ${attempt}), waiting ${delayMs / 1000}s...`);
+      } catch (fetchErr) {
+        console.warn(`[viz] Attempt ${attempt} fetch error:`, fetchErr instanceof Error ? fetchErr.message : fetchErr);
       }
-
-      console.log(`[viz] Got ${buf.byteLength} bytes (attempt ${attempt}), waiting ${delayMs / 1000}s...`);
       // Wait before retrying — image is still generating on Pollinations side
       await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
@@ -666,7 +688,11 @@ Keep it professional, warm, and exciting. No bullet points — flowing paragraph
       safetySettings,
     });
 
-    const result = await model.generateContent(prompt);
+    const result = await withTimeout(
+      model.generateContent(prompt),
+      30_000,
+      "Design explanation"
+    );
     return (
       result.response.text() ||
       "Your personalized design has been created with carefully selected pieces from our approved UAE catalog."
@@ -702,6 +728,7 @@ export async function runDesignPipeline(params: {
   ).run(projectId);
 
   // Stage 1: Analyze space (has internal fallback — safe)
+  console.log(`[pipeline:${projectId}] Stage 1: Analyzing space...`);
   const spaceAnalysis = await analyzeSpace(
     params.roomImageUrl,
     params.roomType,
@@ -711,6 +738,7 @@ export async function runDesignPipeline(params: {
   // Stage 2 + 3: Filter & select products (may throw if catalog is empty)
   let selectedProducts: SelectedProduct[];
   try {
+    console.log(`[pipeline:${projectId}] Stage 2-3: Selecting products...`);
     selectedProducts = await selectProducts(
       spaceAnalysis,
       params.styleSlug,
@@ -719,14 +747,24 @@ export async function runDesignPipeline(params: {
     );
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    console.error("[pipeline] Product selection failed:", msg);
+    console.error(`[pipeline:${projectId}] Product selection failed:`, msg);
     // Retry without user requirements — style categories only
-    selectedProducts = await selectProducts(
-      spaceAnalysis,
-      params.styleSlug,
-      params.budgetAed,
-      null
-    );
+    try {
+      selectedProducts = await selectProducts(
+        spaceAnalysis,
+        params.styleSlug,
+        params.budgetAed,
+        null
+      );
+    } catch (retryErr) {
+      // Both attempts failed — save partial results and throw descriptive error
+      const retryMsg = retryErr instanceof Error ? retryErr.message : String(retryErr);
+      db.prepare(
+        `UPDATE design_projects SET status = 'failed', space_analysis = ?,
+         updated_at = datetime('now') WHERE id = ?`
+      ).run(JSON.stringify(spaceAnalysis), projectId);
+      throw new Error(`Product selection failed after retry: ${retryMsg}`);
+    }
   }
 
   // Enrich with full product data from DB — batched WHERE IN to avoid N+1
@@ -748,36 +786,54 @@ export async function runDesignPipeline(params: {
     })
     .filter(Boolean) as (SelectedProduct & { product: Product })[];
 
-  // Stage 4 + 5: Visualization and Explanation are independent — run in parallel
+  // Save intermediate results immediately (products selected — visible to user even if viz fails)
   const totalCostAed = enriched.reduce(
     (sum, sp) => sum + ((sp.product as unknown as Record<string, number>).price_aed || 0),
     0
   );
-
-  const [visualizationUrl, explanation] = await Promise.all([
-    generateVisualization(spaceAnalysis, enriched, params.styleSlug),
-    generateExplanation(spaceAnalysis, enriched, params.styleSlug, totalCostAed, params.budgetAed),
-  ]);
-
-  // Save results
   db.prepare(
     `UPDATE design_projects SET
-       status = 'completed',
        space_analysis = ?,
        selected_products = ?,
-       visualization_url = ?,
-       design_explanation = ?,
        total_cost_aed = ?,
        updated_at = datetime('now')
      WHERE id = ?`
   ).run(
     JSON.stringify(spaceAnalysis),
     JSON.stringify(selectedProducts),
-    visualizationUrl,
-    explanation,
     totalCostAed,
     projectId
   );
+
+  // Stage 4 + 5: Visualization and Explanation are independent — run in parallel
+  // Each has internal error handling (returns null / fallback string), but we
+  // also wrap in try/catch so a crash in one doesn't lose the other.
+  console.log(`[pipeline:${projectId}] Stage 4-5: Generating visualization + explanation...`);
+  let visualizationUrl: string | null = null;
+  let explanation = "Your personalized design has been created with carefully selected pieces.";
+  try {
+    const results = await Promise.allSettled([
+      generateVisualization(spaceAnalysis, enriched, params.styleSlug),
+      generateExplanation(spaceAnalysis, enriched, params.styleSlug, totalCostAed, params.budgetAed),
+    ]);
+    if (results[0].status === "fulfilled") visualizationUrl = results[0].value;
+    else console.error(`[pipeline:${projectId}] Visualization rejected:`, results[0].reason);
+    if (results[1].status === "fulfilled") explanation = results[1].value;
+    else console.error(`[pipeline:${projectId}] Explanation rejected:`, results[1].reason);
+  } catch (stage45Err) {
+    console.error(`[pipeline:${projectId}] Stage 4-5 error:`, stage45Err);
+    // Continue with whatever we got — partial results are better than a 500
+  }
+
+  // Save final results
+  db.prepare(
+    `UPDATE design_projects SET
+       status = 'completed',
+       visualization_url = ?,
+       design_explanation = ?,
+       updated_at = datetime('now')
+     WHERE id = ?`
+  ).run(visualizationUrl, explanation, projectId);
 
   return {
     spaceAnalysis,
