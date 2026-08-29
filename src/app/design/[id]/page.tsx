@@ -16,6 +16,7 @@ import {
   Building2,
   Maximize2,
   Trash2,
+  Printer,
 } from "lucide-react";
 
 interface DesignProduct {
@@ -197,6 +198,13 @@ export default function DesignResultPage() {
             </h1>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              onClick={() => window.open(`/api/designs/${id}/export`, '_blank')}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm border border-brand-200 text-brand-600 hover:bg-brand-50 transition-colors"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              Export
+            </button>
             <button
               onClick={handleDeleteDesign}
               disabled={deleting}
