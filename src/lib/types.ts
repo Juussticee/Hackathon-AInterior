@@ -37,7 +37,7 @@ export interface Product {
   currency: string;
   productUrl: string;
   affiliateUrl: string | null;
-  mainImageUrl: string;
+  mainImageUrl: string | null;
   galleryUrls: string[];
   lengthCm: number | null;
   widthCm: number | null;
@@ -49,6 +49,7 @@ export interface Product {
   roomTypes: string[];
   minRoomAreaSqm: number | null;
   priceTier: "economy" | "moderate" | "premium";
+  dataSource: string;
   isAvailable: boolean;
   isFeatured: boolean;
   createdAt: string;

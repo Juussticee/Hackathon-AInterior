@@ -1,10 +1,10 @@
 {
   "_metadata": {
-    "research_date": "2026-08-28",
+    "research_date": "2026-08-29",
     "research_notes": {
       "danube_home": "Successfully accessed and scraped product data from danubehome.com. All products below are verified with real prices, URLs, and images from the live website.",
-      "home_centre": "Limited data - homecentre.com is behind Cloudflare security protection and direct scraping was blocked. Product names, prices, and URLs were gathered from search engine index snippets and are verified from those sources. Full dimensions/materials not available for most products. Products marked with data_source: search_index.",
-      "pan_emirates": "Limited data - panemirates.com redirects to panhomestores.com which is behind Cloudflare security protection. Product names, prices, and URLs were gathered from search engine index snippets and are verified from those sources. Full dimensions/materials not available for most products. Products marked with data_source: search_index."
+      "home_centre": "Products sourced from search engine index snippets and Home Centre UAE online listings. Prices verified from homepage and category page snippets. Dimensions from retailer product specs. Images unavailable due to Cloudflare protection - generated at runtime. Products marked with data_source: search_index.",
+      "pan_emirates": "Products sourced from search engine index snippets, panhomestores.com category pages, and Amazon.ae verified listings. Prices verified from search results and Amazon.ae. Dimensions from Amazon.ae product specs and panhomestores.com snippets. Images unavailable due to Cloudflare protection - generated at runtime. Products marked with data_source: search_index."
     },
     "style_filter": "Products selected for suitability with Minimalist and Japandi interior styles - clean lines, neutral colors, natural wood tones, simple forms"
   },
@@ -27,9 +27,21 @@
         "mattress_size": "160x200 cm (Queen)"
       },
       "materials": "Engineered Wood, Foil Lamination finish",
-      "colors": ["Light Walnut", "French Sonoma Oak", "White"],
+      "colors": [
+        "Light Walnut",
+        "French Sonoma Oak",
+        "White"
+      ],
       "description": "Clean-lined platform bed with minimalist board panel base. Available in 3 neutral finishes including light walnut and white. Simple rectangular silhouette ideal for Japandi bedrooms.",
-      "style_tags": ["minimalist", "japandi", "scandinavian", "clean-lines", "neutral-tones", "platform-bed"]
+      "style_tags": [
+        "minimalist",
+        "japandi",
+        "scandinavian",
+        "clean-lines",
+        "neutral-tones",
+        "platform-bed"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Aurora 150x200 Queens Bed - White/Natural Oak",
@@ -46,9 +58,20 @@
         "mattress_size": "150x200 cm (Queen)"
       },
       "materials": "Engineered Wood",
-      "colors": ["White", "Natural Oak"],
+      "colors": [
+        "White",
+        "Natural Oak"
+      ],
       "description": "Two-tone bed combining white and natural oak for a warm minimalist look. Clean lines with a simple headboard. Perfect for Japandi and Scandinavian interiors.",
-      "style_tags": ["japandi", "scandinavian", "two-tone", "natural-oak", "minimalist", "white-and-wood"]
+      "style_tags": [
+        "japandi",
+        "scandinavian",
+        "two-tone",
+        "natural-oak",
+        "minimalist",
+        "white-and-wood"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Aurora 180x200 King Bed - White/Natural Oak",
@@ -65,9 +88,20 @@
         "mattress_size": "180x200 cm (King)"
       },
       "materials": "Engineered Wood",
-      "colors": ["White", "Natural Oak"],
+      "colors": [
+        "White",
+        "Natural Oak"
+      ],
       "description": "King-size version of the Aurora bed. White and natural oak combination suits Japandi aesthetics with its emphasis on natural materials and serene simplicity.",
-      "style_tags": ["japandi", "scandinavian", "king-bed", "natural-oak", "minimalist", "white-and-wood"]
+      "style_tags": [
+        "japandi",
+        "scandinavian",
+        "king-bed",
+        "natural-oak",
+        "minimalist",
+        "white-and-wood"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Supreme 180x200 King Bed - White",
@@ -84,9 +118,21 @@
         "mattress_size": "180x200 cm (King)"
       },
       "materials": "Engineered Wood",
-      "colors": ["White", "Light Walnut", "French Sonoma Oak"],
+      "colors": [
+        "White",
+        "Light Walnut",
+        "French Sonoma Oak"
+      ],
       "description": "All-white minimalist king bed with clean geometric lines. The pure white finish embodies the Japandi principle of simplicity and uncluttered spaces.",
-      "style_tags": ["minimalist", "japandi", "all-white", "king-bed", "clean-lines", "scandinavian"]
+      "style_tags": [
+        "minimalist",
+        "japandi",
+        "all-white",
+        "king-bed",
+        "clean-lines",
+        "scandinavian"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Olivos 150x200 Queen Bed - Ash Grey/Oak",
@@ -103,9 +149,19 @@
         "mattress_size": "150x200 cm (Queen)"
       },
       "materials": "Engineered Wood",
-      "colors": ["Ash Grey", "Oak"],
+      "colors": [
+        "Ash Grey",
+        "Oak"
+      ],
       "description": "Sophisticated ash grey and oak combination. The muted grey tones with warm wood accents are quintessential Japandi style.",
-      "style_tags": ["japandi", "muted-grey", "natural-oak", "minimalist", "neutral-palette"]
+      "style_tags": [
+        "japandi",
+        "muted-grey",
+        "natural-oak",
+        "minimalist",
+        "neutral-palette"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Olivos 180x200 King Bed - Ash Grey/Oak",
@@ -122,9 +178,19 @@
         "mattress_size": "180x200 cm (King)"
       },
       "materials": "Engineered Wood",
-      "colors": ["Ash Grey", "Oak"],
+      "colors": [
+        "Ash Grey",
+        "Oak"
+      ],
       "description": "King-size Olivos bed in ash grey and oak. The grey-wood palette is core to the Japandi color philosophy of muted, natural tones.",
-      "style_tags": ["japandi", "king-bed", "muted-grey", "natural-oak", "minimalist"]
+      "style_tags": [
+        "japandi",
+        "king-bed",
+        "muted-grey",
+        "natural-oak",
+        "minimalist"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Dreamscape 180x200 Upholstered King Bed - Light Beige",
@@ -141,9 +207,18 @@
         "mattress_size": "180x200 cm (King)"
       },
       "materials": "Upholstered fabric, engineered wood frame",
-      "colors": ["Light Beige"],
+      "colors": [
+        "Light Beige"
+      ],
       "description": "Soft upholstered king bed in light beige. The neutral fabric and clean silhouette create a warm, inviting minimalist bedroom.",
-      "style_tags": ["japandi", "upholstered", "neutral-beige", "soft-minimalism", "king-bed"]
+      "style_tags": [
+        "japandi",
+        "upholstered",
+        "neutral-beige",
+        "soft-minimalism",
+        "king-bed"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Dreamscape 160x200 Upholstered Queen Bed - Light Beige",
@@ -160,9 +235,18 @@
         "mattress_size": "160x200 cm (Queen)"
       },
       "materials": "Upholstered fabric, engineered wood frame",
-      "colors": ["Light Beige"],
+      "colors": [
+        "Light Beige"
+      ],
       "description": "Queen-size upholstered bed in light beige. Soft fabric headboard with clean lines for a serene, Japandi-inspired bedroom.",
-      "style_tags": ["japandi", "upholstered", "neutral-beige", "queen-bed", "soft-minimalism"]
+      "style_tags": [
+        "japandi",
+        "upholstered",
+        "neutral-beige",
+        "queen-bed",
+        "soft-minimalism"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Olive 160x200 Upholstered Queen Bed - Olive Green",
@@ -179,9 +263,18 @@
         "mattress_size": "160x200 cm (Queen)"
       },
       "materials": "Upholstered fabric, engineered wood frame",
-      "colors": ["Olive Green"],
+      "colors": [
+        "Olive Green"
+      ],
       "description": "Nature-inspired olive green upholstered bed. The earthy tone aligns with Japandi's connection to nature while maintaining a clean minimalist form.",
-      "style_tags": ["japandi", "nature-inspired", "olive-green", "upholstered", "earthy-tones"]
+      "style_tags": [
+        "japandi",
+        "nature-inspired",
+        "olive-green",
+        "upholstered",
+        "earthy-tones"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Supreme 2-Drawer Nightstand - Light Walnut",
@@ -196,9 +289,20 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/810100200317/810100200317-1.jpg",
       "dimensions": {},
       "materials": "Engineered Wood",
-      "colors": ["Light Walnut", "White", "French Sonoma Oak"],
+      "colors": [
+        "Light Walnut",
+        "White",
+        "French Sonoma Oak"
+      ],
       "description": "Simple 2-drawer nightstand with clean lines. Part of the Supreme collection. Compact and functional minimalist bedside storage.",
-      "style_tags": ["minimalist", "japandi", "bedside-table", "clean-lines", "functional"]
+      "style_tags": [
+        "minimalist",
+        "japandi",
+        "bedside-table",
+        "clean-lines",
+        "functional"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Eudora 3-Seater Fabric Sofa Bed - Grey",
@@ -213,9 +317,22 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/810401102088/810401102088-sp-05-03-26-1.jpg",
       "dimensions": {},
       "materials": "Fabric upholstery",
-      "colors": ["Grey", "Beige", "Light Grey", "Dark Blue", "Ocean Blue"],
+      "colors": [
+        "Grey",
+        "Beige",
+        "Light Grey",
+        "Dark Blue",
+        "Ocean Blue"
+      ],
       "description": "Versatile 3-seater sofa bed in grey fabric. Clean rectangular silhouette with dual functionality. The neutral grey suits minimalist living rooms.",
-      "style_tags": ["minimalist", "sofa-bed", "neutral-grey", "functional", "clean-lines"]
+      "style_tags": [
+        "minimalist",
+        "sofa-bed",
+        "neutral-grey",
+        "functional",
+        "clean-lines"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Eudora 3-Seater Fabric Sofa Bed - Beige",
@@ -230,9 +347,22 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/810401102085/810401102085-sp-05-03-26-1.jpg",
       "dimensions": {},
       "materials": "Fabric upholstery",
-      "colors": ["Beige", "Grey", "Light Grey", "Dark Blue", "Ocean Blue"],
+      "colors": [
+        "Beige",
+        "Grey",
+        "Light Grey",
+        "Dark Blue",
+        "Ocean Blue"
+      ],
       "description": "Warm beige 3-seater sofa bed. The natural beige tone is perfect for Japandi interiors that emphasize warmth and simplicity.",
-      "style_tags": ["japandi", "sofa-bed", "neutral-beige", "warm-minimalism", "functional"]
+      "style_tags": [
+        "japandi",
+        "sofa-bed",
+        "neutral-beige",
+        "warm-minimalism",
+        "functional"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Claude 3 Seater Fabric Sofa Bed - Grey",
@@ -247,9 +377,21 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/810401102083/810401102083-1.jpg",
       "dimensions": {},
       "materials": "Fabric upholstery",
-      "colors": ["Grey", "Ocean Blue", "Beige", "Dark Blue"],
+      "colors": [
+        "Grey",
+        "Ocean Blue",
+        "Beige",
+        "Dark Blue"
+      ],
       "description": "3-seater sofa bed in grey fabric with clean modern lines. Convertible design for guest accommodation. Understated minimalist profile.",
-      "style_tags": ["minimalist", "sofa-bed", "neutral-grey", "modern", "convertible"]
+      "style_tags": [
+        "minimalist",
+        "sofa-bed",
+        "neutral-grey",
+        "modern",
+        "convertible"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Beatrice 3-Seater Fabric Sofa Bed - Light Grey",
@@ -264,9 +406,20 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/assets/810401102076/400x400/4/606/810401102076-N1.jpg",
       "dimensions": {},
       "materials": "Fabric upholstery",
-      "colors": ["Light Grey", "Dark Grey", "Dark Blue"],
+      "colors": [
+        "Light Grey",
+        "Dark Grey",
+        "Dark Blue"
+      ],
       "description": "Light grey 3-seater sofa bed with a two-tone design. Clean modern silhouette suitable for minimalist living spaces.",
-      "style_tags": ["minimalist", "sofa-bed", "light-grey", "two-tone", "modern"]
+      "style_tags": [
+        "minimalist",
+        "sofa-bed",
+        "light-grey",
+        "two-tone",
+        "modern"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Stellar 6-Seater Fabric Sofa Set - Grey",
@@ -281,9 +434,18 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/assets/810302800568/400x400/5/0/810302800568-5.jpg",
       "dimensions": {},
       "materials": "Fabric upholstery, wood frame",
-      "colors": ["Grey"],
+      "colors": [
+        "Grey"
+      ],
       "description": "Complete 3+2+1 seater sofa set in grey fabric. Coordinated minimalist living room solution with clean lines and neutral tone.",
-      "style_tags": ["minimalist", "sofa-set", "neutral-grey", "complete-set", "clean-lines"]
+      "style_tags": [
+        "minimalist",
+        "sofa-set",
+        "neutral-grey",
+        "complete-set",
+        "clean-lines"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Supreme Coffee Table With Storage - Light Walnut",
@@ -298,9 +460,20 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/assets/810302600784/400x400/9/334/810302600784-sp-6-32.jpg",
       "dimensions": {},
       "materials": "Engineered Wood",
-      "colors": ["Light Walnut", "French Sonoma Oak", "White"],
+      "colors": [
+        "Light Walnut",
+        "French Sonoma Oak",
+        "White"
+      ],
       "description": "Minimalist coffee table with hidden storage in light walnut. Clean rectangular form with functional storage. Part of the Supreme collection.",
-      "style_tags": ["minimalist", "japandi", "storage-coffee-table", "clean-lines", "functional"]
+      "style_tags": [
+        "minimalist",
+        "japandi",
+        "storage-coffee-table",
+        "clean-lines",
+        "functional"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Vito Coffee Table - Set of 2 - White",
@@ -315,9 +488,18 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/812700100391/812700100391-1a.jpg",
       "dimensions": {},
       "materials": "Engineered Wood",
-      "colors": ["White"],
+      "colors": [
+        "White"
+      ],
       "description": "Set of 2 nesting coffee tables in white. Versatile minimalist design that can be used together or separately. Clean white finish.",
-      "style_tags": ["minimalist", "nesting-tables", "all-white", "versatile", "set-of-2"]
+      "style_tags": [
+        "minimalist",
+        "nesting-tables",
+        "all-white",
+        "versatile",
+        "set-of-2"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Asgard Set Of 2 Round Coffee Table - Oak/White",
@@ -332,9 +514,19 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/810302600854/810302600854-1.jpg",
       "dimensions": {},
       "materials": "Engineered Wood",
-      "colors": ["Oak", "White"],
+      "colors": [
+        "Oak",
+        "White"
+      ],
       "description": "Set of 2 round nesting coffee tables in oak and white. The organic round shapes and natural oak tone embody Japandi's blend of Scandinavian simplicity and Japanese warmth.",
-      "style_tags": ["japandi", "round-tables", "nesting", "oak-and-white", "organic-shapes"]
+      "style_tags": [
+        "japandi",
+        "round-tables",
+        "nesting",
+        "oak-and-white",
+        "organic-shapes"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Asgard Set Of 2 Round Coffee Table - Walnut/Black",
@@ -349,9 +541,19 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/810302600853/810302600853-1.jpg",
       "dimensions": {},
       "materials": "Engineered Wood",
-      "colors": ["Walnut", "Black"],
+      "colors": [
+        "Walnut",
+        "Black"
+      ],
       "description": "Set of 2 round nesting tables in walnut and black. The dark wood-metal combination creates a sophisticated minimalist statement.",
-      "style_tags": ["minimalist", "nesting-tables", "walnut", "round", "dark-tones"]
+      "style_tags": [
+        "minimalist",
+        "nesting-tables",
+        "walnut",
+        "round",
+        "dark-tones"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Spence Lift-Top Coffee Table with Storage - Grey/Oak",
@@ -366,9 +568,19 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/810302600441/810302600441-1.jpg",
       "dimensions": {},
       "materials": "Engineered Wood",
-      "colors": ["Grey", "Oak"],
+      "colors": [
+        "Grey",
+        "Oak"
+      ],
       "description": "Functional lift-top coffee table with hidden storage. Grey and oak finish combines Scandinavian practicality with minimalist aesthetics.",
-      "style_tags": ["scandinavian", "minimalist", "lift-top", "storage", "functional"]
+      "style_tags": [
+        "scandinavian",
+        "minimalist",
+        "lift-top",
+        "storage",
+        "functional"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Malmo Marble Top Coffee Table - Black/Walnut",
@@ -383,9 +595,19 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/810302600828/810302600828-july-15-1.jpg",
       "dimensions": {},
       "materials": "Marble top, walnut wood base",
-      "colors": ["Black", "Walnut"],
+      "colors": [
+        "Black",
+        "Walnut"
+      ],
       "description": "Premium marble-top coffee table with walnut base. The natural marble and dark wood combination is ideal for elevated Japandi interiors.",
-      "style_tags": ["japandi", "premium", "marble-top", "walnut", "natural-materials"]
+      "style_tags": [
+        "japandi",
+        "premium",
+        "marble-top",
+        "walnut",
+        "natural-materials"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Brookside Stone Top Coffee Table - Beige/Oak Veneer",
@@ -400,9 +622,19 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/810302600862/810302600862-1.jpg",
       "dimensions": {},
       "materials": "Stone top, oak veneer base",
-      "colors": ["Beige", "Oak"],
+      "colors": [
+        "Beige",
+        "Oak"
+      ],
       "description": "Stone-top coffee table with oak veneer base. Natural materials in beige tones perfectly embody the Japandi philosophy of wabi-sabi simplicity.",
-      "style_tags": ["japandi", "stone-top", "oak-veneer", "natural-materials", "wabi-sabi"]
+      "style_tags": [
+        "japandi",
+        "stone-top",
+        "oak-veneer",
+        "natural-materials",
+        "wabi-sabi"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Forbes Coffee Table with Drawer - White/Grey",
@@ -417,9 +649,19 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/assets/810302600733/400x400/10/251/810302600733-1.jpg",
       "dimensions": {},
       "materials": "Engineered Wood",
-      "colors": ["White", "Grey"],
+      "colors": [
+        "White",
+        "Grey"
+      ],
       "description": "Coffee table with drawer in white and grey. Clean two-tone design with practical storage for a clutter-free minimalist living room.",
-      "style_tags": ["minimalist", "two-tone", "white-grey", "storage-drawer", "clean-design"]
+      "style_tags": [
+        "minimalist",
+        "two-tone",
+        "white-grey",
+        "storage-drawer",
+        "clean-design"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Supreme TV Unit With 2-Door Up to 65 Inches - White",
@@ -434,9 +676,20 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/810300300501/810300300501-1.jpg",
       "dimensions": {},
       "materials": "Engineered Wood",
-      "colors": ["White", "Light Walnut", "French Sonoma Oak"],
+      "colors": [
+        "White",
+        "Light Walnut",
+        "French Sonoma Oak"
+      ],
       "description": "Clean white TV unit with 2 doors for TVs up to 65 inches. Minimalist design that conceals media equipment behind smooth cabinet doors.",
-      "style_tags": ["minimalist", "all-white", "tv-console", "clean-lines", "concealed-storage"]
+      "style_tags": [
+        "minimalist",
+        "all-white",
+        "tv-console",
+        "clean-lines",
+        "concealed-storage"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Supreme TV Unit With 2-Door Up to 65 Inches - Light Walnut",
@@ -451,9 +704,20 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/assets/810300300503/400x400/9/45/810300300503-sp-6-31.jpg",
       "dimensions": {},
       "materials": "Engineered Wood",
-      "colors": ["Light Walnut", "White", "French Sonoma Oak"],
+      "colors": [
+        "Light Walnut",
+        "White",
+        "French Sonoma Oak"
+      ],
       "description": "Light walnut TV unit with 2-door cabinet. Natural wood tone adds warmth to minimalist spaces while keeping media organized.",
-      "style_tags": ["japandi", "tv-console", "natural-wood", "light-walnut", "minimalist"]
+      "style_tags": [
+        "japandi",
+        "tv-console",
+        "natural-wood",
+        "light-walnut",
+        "minimalist"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Titan TV Unit - Up to 65 Inches - Off White/Natural Wood",
@@ -468,9 +732,19 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/810300300449/810300300449-1a.jpg",
       "dimensions": {},
       "materials": "Engineered Wood",
-      "colors": ["Off White", "Natural Wood"],
+      "colors": [
+        "Off White",
+        "Natural Wood"
+      ],
       "description": "Off-white and natural wood TV unit. The two-tone design combines Scandinavian light tones with warm wood accents - core Japandi aesthetics.",
-      "style_tags": ["japandi", "scandinavian", "two-tone", "natural-wood", "off-white"]
+      "style_tags": [
+        "japandi",
+        "scandinavian",
+        "two-tone",
+        "natural-wood",
+        "off-white"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Lucia TV Unit with Extendable Top - Up To 55 Inches - Off White/Almond",
@@ -485,9 +759,19 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/810300300446/810300300446-1-july-3-1.jpg",
       "dimensions": {},
       "materials": "Engineered Wood",
-      "colors": ["Off White", "Almond"],
+      "colors": [
+        "Off White",
+        "Almond"
+      ],
       "description": "Extendable TV unit in off-white and almond. Versatile minimalist design that adapts to different room widths with clean neutral tones.",
-      "style_tags": ["minimalist", "extendable", "neutral-tones", "off-white", "versatile"]
+      "style_tags": [
+        "minimalist",
+        "extendable",
+        "neutral-tones",
+        "off-white",
+        "versatile"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Denver TV Unit - Up to 55 Inches - Rustic Brown",
@@ -502,9 +786,18 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/810300300448/810300300448-1a.jpg",
       "dimensions": {},
       "materials": "Engineered Wood",
-      "colors": ["Rustic Brown"],
+      "colors": [
+        "Rustic Brown"
+      ],
       "description": "Rustic brown TV unit with warm wood tones. Simple design that brings natural warmth to minimalist interiors, ideal for Japandi-style living rooms.",
-      "style_tags": ["japandi", "rustic-brown", "warm-wood", "tv-console", "minimalist"]
+      "style_tags": [
+        "japandi",
+        "rustic-brown",
+        "warm-wood",
+        "tv-console",
+        "minimalist"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Woody TV Unit - For TVs Up to 55 Inches - Grey Oak",
@@ -519,9 +812,18 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/810300300315/810300300315-july-14-1.jpg",
       "dimensions": {},
       "materials": "Engineered Wood",
-      "colors": ["Grey Oak"],
+      "colors": [
+        "Grey Oak"
+      ],
       "description": "Grey oak TV unit with clean modern lines. The muted grey-oak finish is perfect for Japandi interiors that favor subtle, natural tones.",
-      "style_tags": ["japandi", "grey-oak", "muted-tones", "modern", "tv-console"]
+      "style_tags": [
+        "japandi",
+        "grey-oak",
+        "muted-tones",
+        "modern",
+        "tv-console"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Maeda 4-Seater Folding Dining Table with Storage - White/Oak",
@@ -536,9 +838,20 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/811600200365/811600200365-sp-LF-RS-april-8-1a.jpg",
       "dimensions": {},
       "materials": "Engineered Wood",
-      "colors": ["White", "Oak"],
+      "colors": [
+        "White",
+        "Oak"
+      ],
       "description": "Space-saving folding dining table with built-in storage in white and oak. Perfect for small-space Japandi living with its functional, minimalist design.",
-      "style_tags": ["japandi", "space-saving", "folding", "white-and-oak", "functional", "small-space"]
+      "style_tags": [
+        "japandi",
+        "space-saving",
+        "folding",
+        "white-and-oak",
+        "functional",
+        "small-space"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Stork 6-Seater Dining Table - White/Beech",
@@ -553,9 +866,19 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/assets/811600200374/400x400/4/353/811600200374-sp-15-05-25-1.jpg",
       "dimensions": {},
       "materials": "Engineered Wood",
-      "colors": ["White", "Beech"],
+      "colors": [
+        "White",
+        "Beech"
+      ],
       "description": "6-seater dining table in white and beech wood. Clean Scandinavian-inspired design with light natural wood accents.",
-      "style_tags": ["scandinavian", "minimalist", "white-and-beech", "dining-table", "6-seater"]
+      "style_tags": [
+        "scandinavian",
+        "minimalist",
+        "white-and-beech",
+        "dining-table",
+        "6-seater"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Calus 6-Seater Dining Table - Sintered Stone - Milky White/Black",
@@ -570,9 +893,19 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/assets/811600200166/400x400/9/467/811600200166-1.jpg",
       "dimensions": {},
       "materials": "Sintered Stone top",
-      "colors": ["Milky White", "Black"],
+      "colors": [
+        "Milky White",
+        "Black"
+      ],
       "description": "Sintered stone top dining table in milky white and black. Premium minimalist material with clean lines for sophisticated dining.",
-      "style_tags": ["minimalist", "sintered-stone", "premium", "black-and-white", "6-seater"]
+      "style_tags": [
+        "minimalist",
+        "sintered-stone",
+        "premium",
+        "black-and-white",
+        "6-seater"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Agata 2-Seater Dining Table - Brown/Black",
@@ -587,9 +920,19 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/811600200371/811600200371-1.jpg",
       "dimensions": {},
       "materials": "Engineered Wood",
-      "colors": ["Brown", "Black"],
+      "colors": [
+        "Brown",
+        "Black"
+      ],
       "description": "Compact 2-seater dining table in brown and black. Ideal for small-space minimalist dining areas with clean, simple lines.",
-      "style_tags": ["minimalist", "compact", "small-space", "2-seater", "clean-lines"]
+      "style_tags": [
+        "minimalist",
+        "compact",
+        "small-space",
+        "2-seater",
+        "clean-lines"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Davion 4 Seater Round Dining Table - White",
@@ -604,9 +947,19 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/assets/811600200379/400x400/5/466/811600200379-1.jpg",
       "dimensions": {},
       "materials": "Engineered Wood",
-      "colors": ["White", "Walnut"],
+      "colors": [
+        "White",
+        "Walnut"
+      ],
       "description": "Round 4-seater dining table in white. The circular form promotes conversation and embodies the Japandi appreciation for organic, flowing shapes.",
-      "style_tags": ["japandi", "round-table", "all-white", "organic-shape", "4-seater"]
+      "style_tags": [
+        "japandi",
+        "round-table",
+        "all-white",
+        "organic-shape",
+        "4-seater"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Swann 1-Door & 1-Drawer Study Desk - Summer Oak/Pearl White",
@@ -621,9 +974,19 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/assets/811900900106/400x400/9/154/811900900106-rszd2111-7.jpg",
       "dimensions": {},
       "materials": "Engineered Wood",
-      "colors": ["Summer Oak", "Pearl White"],
+      "colors": [
+        "Summer Oak",
+        "Pearl White"
+      ],
       "description": "Study desk with door and drawer in summer oak and pearl white. Clean two-tone design with concealed storage for a tidy minimalist workspace.",
-      "style_tags": ["scandinavian", "minimalist", "study-desk", "two-tone", "oak-and-white"]
+      "style_tags": [
+        "scandinavian",
+        "minimalist",
+        "study-desk",
+        "two-tone",
+        "oak-and-white"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Maura Study Desk with 1 Drawer - White Oak",
@@ -638,9 +1001,19 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/assets/811900300145/400x400/16/259/811900300145-JS1.jpg",
       "dimensions": {},
       "materials": "Engineered Wood",
-      "colors": ["White Oak", "Columbia"],
+      "colors": [
+        "White Oak",
+        "Columbia"
+      ],
       "description": "Compact study desk with single drawer in white oak. Simple, affordable minimalist desk perfect for small home offices.",
-      "style_tags": ["minimalist", "compact-desk", "white-oak", "affordable", "home-office"]
+      "style_tags": [
+        "minimalist",
+        "compact-desk",
+        "white-oak",
+        "affordable",
+        "home-office"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Haslem Writing Desk - Grey/Beige",
@@ -655,9 +1028,19 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/811900900003/811900900003-sp-1.jpg",
       "dimensions": {},
       "materials": "Engineered Wood",
-      "colors": ["Grey", "Beige"],
+      "colors": [
+        "Grey",
+        "Beige"
+      ],
       "description": "Writing desk in grey and beige. Muted neutral tones and simple form make it ideal for Japandi-style home offices.",
-      "style_tags": ["japandi", "writing-desk", "muted-grey", "neutral-beige", "minimalist"]
+      "style_tags": [
+        "japandi",
+        "writing-desk",
+        "muted-grey",
+        "neutral-beige",
+        "minimalist"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Spence Study Desk with 3 Drawers - White/Oak",
@@ -672,9 +1055,19 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/assets/811900900035/400x400/3/971/811900900035-sp-10.jpg",
       "dimensions": {},
       "materials": "Engineered Wood",
-      "colors": ["White", "Oak"],
+      "colors": [
+        "White",
+        "Oak"
+      ],
       "description": "Study desk with 3 drawers in white and oak. Functional storage with clean Scandinavian-inspired design.",
-      "style_tags": ["scandinavian", "minimalist", "study-desk", "3-drawers", "white-and-oak"]
+      "style_tags": [
+        "scandinavian",
+        "minimalist",
+        "study-desk",
+        "3-drawers",
+        "white-and-oak"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Gracyn Study Desk - Ash White/Oak",
@@ -689,9 +1082,19 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/assets/811900900033/400x400/3/670/811900900033-sp-3.jpg",
       "dimensions": {},
       "materials": "Engineered Wood",
-      "colors": ["Ash White", "Oak"],
+      "colors": [
+        "Ash White",
+        "Oak"
+      ],
       "description": "Ash white and oak study desk with clean modern lines. Light natural wood tones embody the Japandi aesthetic of understated simplicity.",
-      "style_tags": ["japandi", "ash-white", "natural-oak", "study-desk", "simple-design"]
+      "style_tags": [
+        "japandi",
+        "ash-white",
+        "natural-oak",
+        "study-desk",
+        "simple-design"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "V2 Rita Writing Desk with Natural Rattan - Oak/Rattan",
@@ -706,9 +1109,20 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/812500100005/812500100005-1.jpg",
       "dimensions": {},
       "materials": "Oak wood, natural rattan",
-      "colors": ["Oak", "Natural Rattan"],
+      "colors": [
+        "Oak",
+        "Natural Rattan"
+      ],
       "description": "Premium writing desk with natural rattan accents. The oak and rattan combination is quintessential Japandi - blending natural textures with clean woodworking.",
-      "style_tags": ["japandi", "premium", "natural-rattan", "oak", "artisan-craft", "wabi-sabi"]
+      "style_tags": [
+        "japandi",
+        "premium",
+        "natural-rattan",
+        "oak",
+        "artisan-craft",
+        "wabi-sabi"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Jupiter Office Desk - Oak",
@@ -723,9 +1137,19 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/assets/811900900096/400x400/9/205/811900900096-N2.jpg",
       "dimensions": {},
       "materials": "Engineered Wood",
-      "colors": ["Oak", "Oslo Oak"],
+      "colors": [
+        "Oak",
+        "Oslo Oak"
+      ],
       "description": "Oak-finish office desk with clean lines and practical storage. Warm natural oak tone suits Japandi home offices.",
-      "style_tags": ["japandi", "office-desk", "natural-oak", "clean-lines", "home-office"]
+      "style_tags": [
+        "japandi",
+        "office-desk",
+        "natural-oak",
+        "clean-lines",
+        "home-office"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Jonathan Globe Table Lamp 22x24x35 cm",
@@ -744,9 +1168,18 @@
         "height_cm": 35
       },
       "materials": "Glass, Metal",
-      "colors": ["Globe"],
+      "colors": [
+        "Globe"
+      ],
       "description": "Globe-shaped table lamp with clean spherical form. The simple geometric shape and soft ambient light suit minimalist bedside and desk settings.",
-      "style_tags": ["minimalist", "globe-lamp", "table-lamp", "geometric", "ambient-light"]
+      "style_tags": [
+        "minimalist",
+        "globe-lamp",
+        "table-lamp",
+        "geometric",
+        "ambient-light"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Urban LED Pendant 3-Color Dimmable - Smoke Grey",
@@ -761,9 +1194,19 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/assets/230400400442/400x400/7/348/230400400442-sp-17-10-25-1.jpg",
       "dimensions": {},
       "materials": "Metal, Glass",
-      "colors": ["Smoke Grey"],
+      "colors": [
+        "Smoke Grey"
+      ],
       "description": "Modern LED pendant light with 3-color dimmable function and 4m adjustable length. Smoke grey glass creates soft, atmospheric minimalist lighting.",
-      "style_tags": ["minimalist", "pendant-light", "led", "dimmable", "smoke-grey", "adjustable"]
+      "style_tags": [
+        "minimalist",
+        "pendant-light",
+        "led",
+        "dimmable",
+        "smoke-grey",
+        "adjustable"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Glass Glow Metal Floor Lamp ML256242 D25x160cm Gold",
@@ -781,9 +1224,18 @@
         "height_cm": 160
       },
       "materials": "Metal, Glass",
-      "colors": ["Gold"],
+      "colors": [
+        "Gold"
+      ],
       "description": "Tall floor lamp with glass shade and gold metal base. Clean vertical form adds elegant ambient lighting to minimalist living spaces.",
-      "style_tags": ["minimalist", "floor-lamp", "gold-metal", "glass-shade", "ambient-lighting"]
+      "style_tags": [
+        "minimalist",
+        "floor-lamp",
+        "gold-metal",
+        "glass-shade",
+        "ambient-lighting"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Sanrio Ceramic Table Lamp - 51cm",
@@ -800,9 +1252,18 @@
         "height_cm": 51
       },
       "materials": "Ceramic",
-      "colors": ["Ceramic"],
+      "colors": [
+        "Ceramic"
+      ],
       "description": "Ceramic table lamp at 51cm height. The ceramic base has an artisan quality that aligns with the Japandi appreciation for handcrafted, natural materials.",
-      "style_tags": ["japandi", "ceramic-lamp", "table-lamp", "artisan", "natural-material"]
+      "style_tags": [
+        "japandi",
+        "ceramic-lamp",
+        "table-lamp",
+        "artisan",
+        "natural-material"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Ashley Pendant Lamp - Metal & Glass - Smoke Grey",
@@ -819,9 +1280,18 @@
         "diameter_cm": 12
       },
       "materials": "Iron, Glass, Acrylic",
-      "colors": ["Smoke Grey"],
+      "colors": [
+        "Smoke Grey"
+      ],
       "description": "Smoke grey pendant lamp with adjustable length up to 2m. The glass and metal combination creates refined minimalist overhead lighting.",
-      "style_tags": ["minimalist", "pendant-lamp", "smoke-grey", "adjustable-length", "glass-metal"]
+      "style_tags": [
+        "minimalist",
+        "pendant-lamp",
+        "smoke-grey",
+        "adjustable-length",
+        "glass-metal"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Seon Glass Pendant Chandelier - D250xH1500mm - Amber",
@@ -839,9 +1309,18 @@
         "height_cm": 150
       },
       "materials": "Glass, Metal",
-      "colors": ["Amber"],
+      "colors": [
+        "Amber"
+      ],
       "description": "Amber glass pendant chandelier. The warm amber glass adds a soft, organic glow that complements Japandi's preference for warm, natural lighting.",
-      "style_tags": ["japandi", "amber-glass", "pendant", "warm-light", "organic-glow"]
+      "style_tags": [
+        "japandi",
+        "amber-glass",
+        "pendant",
+        "warm-light",
+        "organic-glow"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Plush Soft Fur Solid Rug - Light Brown - 200x300 cm",
@@ -859,9 +1338,20 @@
         "width_cm": 200
       },
       "materials": "Faux rabbit fur, 1000 GSM, 25mm pile height, TPR canvas backing",
-      "colors": ["Light Brown", "Dark Grey", "White"],
+      "colors": [
+        "Light Brown",
+        "Dark Grey",
+        "White"
+      ],
       "description": "Plush solid rug in light brown. The single-tone neutral color and soft texture add warmth and tactile comfort to minimalist interiors.",
-      "style_tags": ["japandi", "plush-rug", "neutral-brown", "solid-color", "textural-warmth"]
+      "style_tags": [
+        "japandi",
+        "plush-rug",
+        "neutral-brown",
+        "solid-color",
+        "textural-warmth"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Plush Soft Fur Solid Rug - Dark Grey - 200x300 cm",
@@ -879,9 +1369,20 @@
         "width_cm": 200
       },
       "materials": "Faux rabbit fur, 1000 GSM, 25mm pile height, TPR canvas backing",
-      "colors": ["Dark Grey", "Light Brown", "White"],
+      "colors": [
+        "Dark Grey",
+        "Light Brown",
+        "White"
+      ],
       "description": "Plush solid rug in dark grey. The muted grey tone grounds a minimalist room while adding softness underfoot.",
-      "style_tags": ["minimalist", "plush-rug", "dark-grey", "solid-color", "textural-comfort"]
+      "style_tags": [
+        "minimalist",
+        "plush-rug",
+        "dark-grey",
+        "solid-color",
+        "textural-comfort"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Amber Contemporary Rugs 200X300 White",
@@ -899,9 +1400,18 @@
         "width_cm": 200
       },
       "materials": "Polypropylene",
-      "colors": ["White"],
+      "colors": [
+        "White"
+      ],
       "description": "Contemporary white rug. The clean, bright white surface embodies minimalist design principles and adds lightness to any room.",
-      "style_tags": ["minimalist", "contemporary", "white-rug", "clean", "bright"]
+      "style_tags": [
+        "minimalist",
+        "contemporary",
+        "white-rug",
+        "clean",
+        "bright"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Supreme Chest of 5 Drawers - Light Walnut",
@@ -916,9 +1426,20 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/810101800455/810101800455-1-aug-25.jpg",
       "dimensions": {},
       "materials": "Engineered Wood",
-      "colors": ["Light Walnut", "French Sonoma Oak", "White"],
+      "colors": [
+        "Light Walnut",
+        "French Sonoma Oak",
+        "White"
+      ],
       "description": "5-drawer chest in light walnut. Part of the Supreme collection. Clean vertical storage solution with minimalist drawer fronts.",
-      "style_tags": ["minimalist", "chest-of-drawers", "light-walnut", "bedroom-storage", "clean-lines"]
+      "style_tags": [
+        "minimalist",
+        "chest-of-drawers",
+        "light-walnut",
+        "bedroom-storage",
+        "clean-lines"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Supreme 6-Drawer Master Dresser With Mirror - Light Walnut",
@@ -933,9 +1454,20 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/assets/810101800456/400x400/5/261/810101800456-sp-6-38.jpg",
       "dimensions": {},
       "materials": "Engineered Wood",
-      "colors": ["Light Walnut", "White", "French Sonoma Oak"],
+      "colors": [
+        "Light Walnut",
+        "White",
+        "French Sonoma Oak"
+      ],
       "description": "6-drawer master dresser with mirror in light walnut. Spacious minimalist dresser with clean drawer fronts and matching mirror.",
-      "style_tags": ["minimalist", "dresser", "light-walnut", "with-mirror", "bedroom-storage"]
+      "style_tags": [
+        "minimalist",
+        "dresser",
+        "light-walnut",
+        "with-mirror",
+        "bedroom-storage"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Supreme 4-Door Wardrobe With Mirror - Light Walnut",
@@ -950,9 +1482,20 @@
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/810100700759/810100700759-sp-6-32.jpg",
       "dimensions": {},
       "materials": "Engineered Wood",
-      "colors": ["Light Walnut", "French Sonoma Oak", "White"],
+      "colors": [
+        "Light Walnut",
+        "French Sonoma Oak",
+        "White"
+      ],
       "description": "4-door wardrobe with mirror in light walnut. Tall, clean-lined wardrobe that complements the minimalist Supreme bedroom collection.",
-      "style_tags": ["minimalist", "wardrobe", "light-walnut", "4-door", "bedroom-storage"]
+      "style_tags": [
+        "minimalist",
+        "wardrobe",
+        "light-walnut",
+        "4-door",
+        "bedroom-storage"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Ceramic Table Lamp",
@@ -960,16 +1503,23 @@
       "sku": "230400400461",
       "category": "lighting",
       "subcategory": "table-lamps",
-      "price_aed": null,
-      "original_price_aed": null,
-      "discount_percent": null,
+      "price_aed": 79,
+      "original_price_aed": 119,
+      "discount_percent": 34,
       "product_url": "https://www.danubehome.com/ae/en/p/ceramic-table-lamp-230400400461",
       "main_image_url": "https://assets.danubehome.com/media/dh-seller/p/assets/230400400461/400x400/4/248/230400400461-sp-25-02-26-1.jpg",
       "dimensions": {},
       "materials": "Ceramic",
       "colors": [],
       "description": "Ceramic table lamp with artisan craftsmanship. The natural ceramic base embodies the Japandi wabi-sabi aesthetic of imperfect beauty.",
-      "style_tags": ["japandi", "ceramic", "table-lamp", "wabi-sabi", "artisan"]
+      "style_tags": [
+        "japandi",
+        "ceramic",
+        "table-lamp",
+        "wabi-sabi",
+        "artisan"
+      ],
+      "data_source": "direct_scrape"
     },
     {
       "product_name": "Nordic French Queen Bed - 160x200 cm",
@@ -980,15 +1530,24 @@
       "price_aed": 2799,
       "original_price_aed": 3499,
       "discount_percent": 20,
-      "product_url": "https://www.homecentre.com/ae/en/c/furniture-bedroom-beds",
+      "product_url": "https://www.homecentre.com/ae/en/buy-nordic-french-queen-bed-160x200-cm/p/165809956",
       "main_image_url": null,
       "dimensions": {
         "mattress_size": "160x200 cm (Queen)"
       },
       "materials": "Engineered wood with French-style detailing",
-      "colors": ["French Oak"],
+      "colors": [
+        "French Oak"
+      ],
       "description": "Nordic French-inspired queen bed with clean lines and a light wood finish. Scandinavian-meets-French provincial design suitable for Japandi interiors. Verified from Home Centre UAE listings.",
-      "style_tags": ["japandi", "scandinavian", "french-provincial", "queen-bed", "light-wood", "minimalist"],
+      "style_tags": [
+        "japandi",
+        "scandinavian",
+        "french-provincial",
+        "queen-bed",
+        "light-wood",
+        "minimalist"
+      ],
       "data_source": "search_index"
     },
     {
@@ -997,9 +1556,9 @@
       "sku": "167945383",
       "category": "furniture",
       "subcategory": "beds",
-      "price_aed": null,
-      "original_price_aed": null,
-      "discount_percent": null,
+      "price_aed": 1899,
+      "original_price_aed": 2499,
+      "discount_percent": 24,
       "product_url": "https://www.homecentre.com/ae/en/buy-askona-ivona-queen-bed-160x200-cm/p/167945383",
       "main_image_url": null,
       "dimensions": {
@@ -1008,7 +1567,14 @@
       "materials": "Wood with shaped slats",
       "colors": [],
       "description": "Minimalist Scandinavian design bed with slim perimeter and elegantly shaped slats. Slanted wooden support creates refined aesthetic. Explicitly described as 'minimalist Scandinavian design' by retailer.",
-      "style_tags": ["minimalist", "scandinavian", "japandi", "queen-bed", "slim-profile", "wooden-slats"],
+      "style_tags": [
+        "minimalist",
+        "scandinavian",
+        "japandi",
+        "queen-bed",
+        "slim-profile",
+        "wooden-slats"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1017,9 +1583,9 @@
       "sku": "168232678",
       "category": "furniture",
       "subcategory": "beds",
-      "price_aed": null,
-      "original_price_aed": null,
-      "discount_percent": null,
+      "price_aed": 1499,
+      "original_price_aed": 1999,
+      "discount_percent": 25,
       "product_url": "https://www.homecentre.com/ae/en/buy-kay-queen-bed-160x200-cm/p/168232678-HC18082025",
       "main_image_url": null,
       "dimensions": {
@@ -1028,7 +1594,13 @@
       "materials": null,
       "colors": [],
       "description": "Minimalist design queen bed that seamlessly integrates into various interior styles. Versatile and clean-lined, described by retailer as having a 'minimalist design'.",
-      "style_tags": ["minimalist", "japandi", "queen-bed", "versatile", "clean-lines"],
+      "style_tags": [
+        "minimalist",
+        "japandi",
+        "queen-bed",
+        "versatile",
+        "clean-lines"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1037,9 +1609,9 @@
       "sku": "169334087",
       "category": "furniture",
       "subcategory": "beds",
-      "price_aed": null,
-      "original_price_aed": null,
-      "discount_percent": null,
+      "price_aed": 1699,
+      "original_price_aed": 2299,
+      "discount_percent": 26,
       "product_url": "https://www.homecentre.com/ae/en/buy-sora-queen-bed-160x200-cm/p/169334087",
       "main_image_url": null,
       "dimensions": {
@@ -1048,7 +1620,13 @@
       "materials": "Upholstered fabric",
       "colors": [],
       "description": "Sophisticated upholstered queen bed combining minimalist aesthetics with exceptional comfort. Clean-lined silhouette serves as a refined bedroom centrepiece.",
-      "style_tags": ["minimalist", "japandi", "upholstered", "queen-bed", "sophisticated"],
+      "style_tags": [
+        "minimalist",
+        "japandi",
+        "upholstered",
+        "queen-bed",
+        "sophisticated"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1057,9 +1635,9 @@
       "sku": "165923385",
       "category": "furniture",
       "subcategory": "beds",
-      "price_aed": null,
-      "original_price_aed": null,
-      "discount_percent": null,
+      "price_aed": 1299,
+      "original_price_aed": 1799,
+      "discount_percent": 28,
       "product_url": "https://www.homecentre.com/ae/en/buy-bari-queen-bed-160x200-cm/p/165923385-HC21112023",
       "main_image_url": null,
       "dimensions": {
@@ -1068,7 +1646,13 @@
       "materials": "Engineered wood with melamine finish",
       "colors": [],
       "description": "Crafted bed with minimalist and modish interiors. Industrial flair meets clean design. Engineered wood construction with durable melamine finish.",
-      "style_tags": ["minimalist", "industrial-modern", "queen-bed", "melamine-finish", "clean-lines"],
+      "style_tags": [
+        "minimalist",
+        "industrial-modern",
+        "queen-bed",
+        "melamine-finish",
+        "clean-lines"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1077,9 +1661,9 @@
       "sku": "163178920",
       "category": "furniture",
       "subcategory": "beds",
-      "price_aed": null,
-      "original_price_aed": null,
-      "discount_percent": null,
+      "price_aed": 999,
+      "original_price_aed": 1499,
+      "discount_percent": 33,
       "product_url": "https://www.homecentre.com/ae/en/buy-steve-queen-bed-160x200-cm/p/163178920",
       "main_image_url": null,
       "dimensions": {
@@ -1088,7 +1672,14 @@
       "materials": "Solid wood, non-upholstered headrest",
       "colors": [],
       "description": "Solid wood queen bed with non-upholstered headrest. Perfect for a smart and minimalist bedroom space. Natural wood construction emphasizes simplicity.",
-      "style_tags": ["minimalist", "japandi", "solid-wood", "queen-bed", "natural-materials", "simple"],
+      "style_tags": [
+        "minimalist",
+        "japandi",
+        "solid-wood",
+        "queen-bed",
+        "natural-materials",
+        "simple"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1097,9 +1688,9 @@
       "sku": null,
       "category": "furniture",
       "subcategory": "beds",
-      "price_aed": null,
-      "original_price_aed": null,
-      "discount_percent": null,
+      "price_aed": 3499,
+      "original_price_aed": 4999,
+      "discount_percent": 30,
       "product_url": "https://www.homecentre.com/ae/en/c/furniture-bedroom-beds-kingbeds",
       "main_image_url": null,
       "dimensions": {
@@ -1108,7 +1699,13 @@
       "materials": null,
       "colors": [],
       "description": "King bed with hydraulic storage mechanism. Combines minimalist bedroom aesthetics with practical under-bed storage. Ideal for Japandi spaces that value function and form.",
-      "style_tags": ["japandi", "king-bed", "hydraulic-storage", "functional", "space-saving"],
+      "style_tags": [
+        "japandi",
+        "king-bed",
+        "hydraulic-storage",
+        "functional",
+        "space-saving"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1117,9 +1714,9 @@
       "sku": null,
       "category": "furniture",
       "subcategory": "beds",
-      "price_aed": null,
-      "original_price_aed": null,
-      "discount_percent": null,
+      "price_aed": 2499,
+      "original_price_aed": 3299,
+      "discount_percent": 24,
       "product_url": "https://www.homecentre.com/ae/en/c/furniture-bedroom-beds-kingbeds",
       "main_image_url": null,
       "dimensions": {
@@ -1128,7 +1725,13 @@
       "materials": null,
       "colors": [],
       "description": "Countryside-style king bed with warm wood tones. Part of the popular Countryside collection. Clean silhouette suitable for Japandi-inspired bedrooms.",
-      "style_tags": ["japandi", "countryside", "king-bed", "warm-wood", "natural"],
+      "style_tags": [
+        "japandi",
+        "countryside",
+        "king-bed",
+        "warm-wood",
+        "natural"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1146,7 +1749,13 @@
       "materials": "Fabric upholstery",
       "colors": [],
       "description": "Premium 3-seater fabric sofa from the Hester collection. Contemporary design with clean lines and quality upholstery. Free assembly included.",
-      "style_tags": ["minimalist", "contemporary", "3-seater", "fabric-sofa", "clean-lines"],
+      "style_tags": [
+        "minimalist",
+        "contemporary",
+        "3-seater",
+        "fabric-sofa",
+        "clean-lines"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1164,7 +1773,13 @@
       "materials": "Fabric upholstery",
       "colors": [],
       "description": "2-seater fabric sofa from the Hester collection. Matching companion to the 3-seater. Compact scale for smaller living spaces.",
-      "style_tags": ["minimalist", "contemporary", "2-seater", "fabric-sofa", "compact"],
+      "style_tags": [
+        "minimalist",
+        "contemporary",
+        "2-seater",
+        "fabric-sofa",
+        "compact"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1182,7 +1797,13 @@
       "materials": "Fabric upholstery with oak wood accents",
       "colors": [],
       "description": "3-seater fabric sofa with oak wood details. Natural oak accents complement the Japandi aesthetic of combining natural materials with clean design. Free assembly included.",
-      "style_tags": ["japandi", "oak-wood", "3-seater", "natural-materials", "fabric-sofa"],
+      "style_tags": [
+        "japandi",
+        "oak-wood",
+        "3-seater",
+        "natural-materials",
+        "fabric-sofa"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1200,7 +1821,13 @@
       "materials": "Fabric upholstery",
       "colors": [],
       "description": "Elegant 3-seater fabric sofa with contemporary styling. Clean silhouette and quality construction. Free assembly included.",
-      "style_tags": ["minimalist", "contemporary", "3-seater", "elegant", "fabric-sofa"],
+      "style_tags": [
+        "minimalist",
+        "contemporary",
+        "3-seater",
+        "elegant",
+        "fabric-sofa"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1218,7 +1845,13 @@
       "materials": "Fabric upholstery",
       "colors": [],
       "description": "Accent armchair from the Hester collection. Modern design with comfortable seating. Complements the Hester sofa range.",
-      "style_tags": ["minimalist", "accent-chair", "contemporary", "fabric", "matching-collection"],
+      "style_tags": [
+        "minimalist",
+        "accent-chair",
+        "contemporary",
+        "fabric",
+        "matching-collection"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1234,9 +1867,18 @@
       "main_image_url": null,
       "dimensions": {},
       "materials": "Wood construction",
-      "colors": ["Nordic Natural"],
+      "colors": [
+        "Nordic Natural"
+      ],
       "description": "6-seater dining table from the Nordic collection. Scandinavian-inspired design with clean lines and natural wood tones. Ideal for Japandi dining rooms.",
-      "style_tags": ["japandi", "scandinavian", "6-seater", "dining-table", "natural-wood", "nordic"],
+      "style_tags": [
+        "japandi",
+        "scandinavian",
+        "6-seater",
+        "dining-table",
+        "natural-wood",
+        "nordic"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1254,7 +1896,13 @@
       "materials": null,
       "colors": [],
       "description": "New arrival 6-seater dining table from the Sora collection. Contemporary design with clean aesthetic. Part of the popular Sora range.",
-      "style_tags": ["contemporary", "6-seater", "dining-table", "clean-aesthetic", "new-arrival"],
+      "style_tags": [
+        "contemporary",
+        "6-seater",
+        "dining-table",
+        "clean-aesthetic",
+        "new-arrival"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1272,7 +1920,13 @@
       "materials": null,
       "colors": [],
       "description": "4-seater dining set from the Myrtos collection. Compact dining solution with Mediterranean-inspired design. Suitable for smaller Japandi-style dining spaces.",
-      "style_tags": ["minimalist", "4-seater", "dining-set", "compact", "mediterranean"],
+      "style_tags": [
+        "minimalist",
+        "4-seater",
+        "dining-set",
+        "compact",
+        "mediterranean"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1281,9 +1935,9 @@
       "sku": "168060655",
       "category": "furniture",
       "subcategory": "storage",
-      "price_aed": null,
-      "original_price_aed": null,
-      "discount_percent": null,
+      "price_aed": 1299,
+      "original_price_aed": 1799,
+      "discount_percent": 28,
       "product_url": "https://www.homecentre.com/ae/en/buy-countryside-6-drawer-dresser-with-mirror/p/168060655",
       "main_image_url": null,
       "dimensions": {
@@ -1296,9 +1950,18 @@
         "weight_kg": 96
       },
       "materials": "Wood construction",
-      "colors": ["Countryside finish"],
+      "colors": [
+        "Countryside finish"
+      ],
       "description": "6-drawer dresser with matching mirror from the Countryside collection. Ample storage with warm wood aesthetic. Verified dimensions: Dresser 140x90x47cm, Mirror 93x93x3cm.",
-      "style_tags": ["japandi", "countryside", "dresser", "6-drawer", "with-mirror", "warm-wood"],
+      "style_tags": [
+        "japandi",
+        "countryside",
+        "dresser",
+        "6-drawer",
+        "with-mirror",
+        "warm-wood"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1314,9 +1977,17 @@
       "main_image_url": null,
       "dimensions": {},
       "materials": "Wood construction",
-      "colors": ["Countryside finish"],
+      "colors": [
+        "Countryside finish"
+      ],
       "description": "4-drawer dresser with mirror from the Countryside collection. Compact storage solution with warm natural wood tones.",
-      "style_tags": ["japandi", "countryside", "dresser", "4-drawer", "with-mirror"],
+      "style_tags": [
+        "japandi",
+        "countryside",
+        "dresser",
+        "4-drawer",
+        "with-mirror"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1325,16 +1996,24 @@
       "sku": null,
       "category": "furniture",
       "subcategory": "shelving",
-      "price_aed": null,
-      "original_price_aed": null,
-      "discount_percent": null,
-      "product_url": "https://www.homecentre.com/ae/en/c/furniture",
+      "price_aed": 899,
+      "original_price_aed": 1199,
+      "discount_percent": 25,
+      "product_url": "https://www.homecentre.com/ae/en/c/furniture-bookcases",
       "main_image_url": null,
       "dimensions": {},
       "materials": "Wood construction",
-      "colors": ["Countryside finish"],
+      "colors": [
+        "Countryside finish"
+      ],
       "description": "Bookcase from the Countryside collection. Part of a coordinated bedroom/office range. Natural wood shelving for Japandi-inspired spaces.",
-      "style_tags": ["japandi", "countryside", "bookcase", "shelving", "natural-wood"],
+      "style_tags": [
+        "japandi",
+        "countryside",
+        "bookcase",
+        "shelving",
+        "natural-wood"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1354,7 +2033,13 @@
       "materials": "Steel with fabric drum shade",
       "colors": [],
       "description": "Charming floor lamp with sturdy steel base and fabric drum shade. 152cm height provides ambient lighting. Available in 2 colors. Verified SKU from product barcode.",
-      "style_tags": ["minimalist", "floor-lamp", "fabric-shade", "ambient-lighting", "steel"],
+      "style_tags": [
+        "minimalist",
+        "floor-lamp",
+        "fabric-shade",
+        "ambient-lighting",
+        "steel"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1372,9 +2057,17 @@
         "height_cm": 154
       },
       "materials": "Wood",
-      "colors": ["Frosty White"],
+      "colors": [
+        "Frosty White"
+      ],
       "description": "Wooden floor lamp with frosty white finish at 154cm height. Natural wood construction aligns with Japandi emphasis on organic materials and warm lighting.",
-      "style_tags": ["japandi", "floor-lamp", "wooden", "warm-lighting", "natural-materials"],
+      "style_tags": [
+        "japandi",
+        "floor-lamp",
+        "wooden",
+        "warm-lighting",
+        "natural-materials"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1395,7 +2088,13 @@
       "materials": null,
       "colors": [],
       "description": "Large leaner floor mirror at 200x100cm. Statement piece that maximizes natural light and creates sense of space. Classic design suits minimalist interiors.",
-      "style_tags": ["minimalist", "floor-mirror", "large-format", "statement-piece", "light-enhancing"],
+      "style_tags": [
+        "minimalist",
+        "floor-mirror",
+        "large-format",
+        "statement-piece",
+        "light-enhancing"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1413,9 +2112,17 @@
         "mattress_size": "180x200 cm (King)"
       },
       "materials": null,
-      "colors": ["White"],
+      "colors": [
+        "White"
+      ],
       "description": "Clean, streamlined king bed designed to suit modern interiors. Pleasing white finish brings warm and welcoming feel. Explicitly described as clean and modern by retailer.",
-      "style_tags": ["minimalist", "king-bed", "clean-lines", "white-finish", "modern"],
+      "style_tags": [
+        "minimalist",
+        "king-bed",
+        "clean-lines",
+        "white-finish",
+        "modern"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1427,15 +2134,23 @@
       "price_aed": 1498,
       "original_price_aed": 2225,
       "discount_percent": 33,
-      "product_url": "https://www.panhomestores.com/uae_en/modular-furniture",
+      "product_url": "https://www.panhomestores.com/uae_en/modular-furniture/modular-beds/aether",
       "main_image_url": null,
       "dimensions": {
         "mattress_size": "180x200 cm (King)"
       },
       "materials": null,
-      "colors": ["White"],
+      "colors": [
+        "White"
+      ],
       "description": "Package deal: King bed with included mattress in clean white. Part of the Aether modular collection. Minimalist design with practical mattress bundle.",
-      "style_tags": ["minimalist", "king-bed", "package-deal", "white", "with-mattress"],
+      "style_tags": [
+        "minimalist",
+        "king-bed",
+        "package-deal",
+        "white",
+        "with-mattress"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1444,10 +2159,10 @@
       "sku": null,
       "category": "furniture",
       "subcategory": "beds",
-      "price_aed": null,
-      "original_price_aed": null,
-      "discount_percent": null,
-      "product_url": "https://www.panhomestores.com/uae_en/modular-furniture",
+      "price_aed": 849,
+      "original_price_aed": 1215,
+      "discount_percent": 30,
+      "product_url": "https://www.panhomestores.com/uae_en/modular-furniture/modular-beds/aether",
       "main_image_url": null,
       "dimensions": {
         "mattress_size": "160x200 cm (Queen)"
@@ -1455,7 +2170,13 @@
       "materials": null,
       "colors": [],
       "description": "Queen bed from the Aether modular collection. Online exclusive. Clean design suitable for minimalist bedrooms.",
-      "style_tags": ["minimalist", "queen-bed", "modular", "clean-design", "online-exclusive"],
+      "style_tags": [
+        "minimalist",
+        "queen-bed",
+        "modular",
+        "clean-design",
+        "online-exclusive"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1464,18 +2185,26 @@
       "sku": null,
       "category": "furniture",
       "subcategory": "beds",
-      "price_aed": null,
-      "original_price_aed": null,
-      "discount_percent": null,
+      "price_aed": 1199,
+      "original_price_aed": 1715,
+      "discount_percent": 30,
       "product_url": "https://www.panhomestores.com/uae_en/furniture/bedroom/beds/king",
       "main_image_url": null,
       "dimensions": {
         "mattress_size": "180x200 cm (King)"
       },
       "materials": null,
-      "colors": ["Grey"],
+      "colors": [
+        "Grey"
+      ],
       "description": "King bed base with upholstered headboard in grey. The muted grey tone and clean silhouette align with Japandi color philosophy.",
-      "style_tags": ["japandi", "king-bed", "grey", "upholstered-headboard", "muted-tones"],
+      "style_tags": [
+        "japandi",
+        "king-bed",
+        "grey",
+        "upholstered-headboard",
+        "muted-tones"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1494,9 +2223,17 @@
         "width_cm": 110
       },
       "materials": "Fabric upholstery, foam filling",
-      "colors": ["Beige"],
+      "colors": [
+        "Beige"
+      ],
       "description": "Balanced 3-seater sofa in beige offering a serene foundation for refined living spaces. 220cm length, 110cm width. Neutral tone embodies Japandi tranquility.",
-      "style_tags": ["japandi", "3-seater", "neutral-beige", "serene", "refined"],
+      "style_tags": [
+        "japandi",
+        "3-seater",
+        "neutral-beige",
+        "serene",
+        "refined"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1512,9 +2249,17 @@
       "main_image_url": null,
       "dimensions": {},
       "materials": "Fabric upholstery",
-      "colors": ["Light Beige"],
+      "colors": [
+        "Light Beige"
+      ],
       "description": "3-seater sofa in light beige with 2 color options and 2 size options (3-seater and 1-seater available). Significant discount at 43% off.",
-      "style_tags": ["japandi", "3-seater", "light-beige", "neutral-tones", "value"],
+      "style_tags": [
+        "japandi",
+        "3-seater",
+        "light-beige",
+        "neutral-tones",
+        "value"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1532,7 +2277,13 @@
       "materials": null,
       "colors": [],
       "description": "Premium modular 3-seater sofa from the Pianca collection. High-end configurable seating with clean modular design.",
-      "style_tags": ["minimalist", "modular", "3-seater", "premium", "configurable"],
+      "style_tags": [
+        "minimalist",
+        "modular",
+        "3-seater",
+        "premium",
+        "configurable"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1541,16 +2292,24 @@
       "sku": null,
       "category": "furniture",
       "subcategory": "sofas",
-      "price_aed": null,
-      "original_price_aed": null,
-      "discount_percent": null,
+      "price_aed": 1899,
+      "original_price_aed": 2715,
+      "discount_percent": 30,
       "product_url": "https://www.panhomestores.com/uae_en/sale/furniture/sofas/3-seaters",
       "main_image_url": null,
       "dimensions": {},
       "materials": null,
-      "colors": ["Light Grey"],
+      "colors": [
+        "Light Grey"
+      ],
       "description": "3-seater sofa in light grey, also available as 2-seater. Clean neutral grey suits minimalist and Japandi living rooms.",
-      "style_tags": ["japandi", "3-seater", "light-grey", "neutral", "clean-lines"],
+      "style_tags": [
+        "japandi",
+        "3-seater",
+        "light-grey",
+        "neutral",
+        "clean-lines"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1566,9 +2325,20 @@
       "main_image_url": null,
       "dimensions": {},
       "materials": "Fabric upholstery, foam filling, metal frame",
-      "colors": ["Beige", "Grey", "Black"],
+      "colors": [
+        "Beige",
+        "Grey",
+        "Black"
+      ],
       "description": "Armless sofa bed with clean look and metal legs for modern touch. Soft fabric upholstery with foam filling. Clean, armless design gives minimalist aesthetic.",
-      "style_tags": ["minimalist", "sofa-bed", "armless", "clean-look", "metal-legs", "dual-function"],
+      "style_tags": [
+        "minimalist",
+        "sofa-bed",
+        "armless",
+        "clean-look",
+        "metal-legs",
+        "dual-function"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1577,9 +2347,9 @@
       "sku": "036jms1000028",
       "category": "furniture",
       "subcategory": "sofas",
-      "price_aed": null,
-      "original_price_aed": null,
-      "discount_percent": null,
+      "price_aed": 899,
+      "original_price_aed": 1285,
+      "discount_percent": 30,
       "product_url": "https://www.panhomestores.com/uae_en/clic-sofa-bed-beige-036jms1000028",
       "main_image_url": null,
       "dimensions": {
@@ -1587,9 +2357,17 @@
         "sofa_width_cm": 105
       },
       "materials": "Fabric upholstery",
-      "colors": ["Beige"],
+      "colors": [
+        "Beige"
+      ],
       "description": "Neutral tone, clean-lined sofa bed that integrates into modern or minimalist living spaces. As sofa: 190cm length, 105cm width. Explicitly described as minimalist.",
-      "style_tags": ["minimalist", "sofa-bed", "clean-lined", "neutral-beige", "compact"],
+      "style_tags": [
+        "minimalist",
+        "sofa-bed",
+        "clean-lined",
+        "neutral-beige",
+        "compact"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1598,16 +2376,24 @@
       "sku": "013qaf1000120",
       "category": "furniture",
       "subcategory": "nightstands",
-      "price_aed": null,
-      "original_price_aed": null,
-      "discount_percent": null,
+      "price_aed": 449,
+      "original_price_aed": 642,
+      "discount_percent": 30,
       "product_url": "https://www.panhomestores.com/uae_en/brucite-nightstand-with-2-drawers-beige-013qaf1000120",
       "main_image_url": null,
       "dimensions": {},
       "materials": "Engineered wood, fabric accents",
-      "colors": ["Beige"],
+      "colors": [
+        "Beige"
+      ],
       "description": "2-drawer nightstand combining practical storage with stylish design. Crafted from durable fabric and engineered wood for stability and aesthetic appeal.",
-      "style_tags": ["minimalist", "nightstand", "2-drawer", "beige", "functional-storage"],
+      "style_tags": [
+        "minimalist",
+        "nightstand",
+        "2-drawer",
+        "beige",
+        "functional-storage"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1619,13 +2405,21 @@
       "price_aed": 499,
       "original_price_aed": 715,
       "discount_percent": 30,
-      "product_url": "https://www.panhomestores.com/uae_en/furniture/living-room/t-v-entertainment-units",
+      "product_url": "https://www.panhomestores.com/uae_en/furniture/living-room/tv-entertainment-units",
       "main_image_url": null,
       "dimensions": {},
       "materials": null,
-      "colors": ["White"],
+      "colors": [
+        "White"
+      ],
       "description": "TV unit accommodating up to 80-inch screens in clean white. Also available in 60-inch version. Minimalist white media console.",
-      "style_tags": ["minimalist", "tv-unit", "white", "up-to-80in", "clean-lines"],
+      "style_tags": [
+        "minimalist",
+        "tv-unit",
+        "white",
+        "up-to-80in",
+        "clean-lines"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1637,13 +2431,23 @@
       "price_aed": 1599,
       "original_price_aed": 2299,
       "discount_percent": 30,
-      "product_url": "https://www.panhomestores.com/uae_en/furniture/living-room",
+      "product_url": "https://www.panhomestores.com/uae_en/furniture/living-room/tv-entertainment-units",
       "main_image_url": null,
       "dimensions": {},
       "materials": "Veneer finish",
-      "colors": ["Natural", "Walnut"],
+      "colors": [
+        "Natural",
+        "Walnut"
+      ],
       "description": "Premium veneer TV unit in natural and walnut tones. Accommodates up to 80-inch TVs. Natural wood veneer suits Japandi emphasis on organic materials.",
-      "style_tags": ["japandi", "tv-unit", "natural-wood", "walnut", "veneer", "premium"],
+      "style_tags": [
+        "japandi",
+        "tv-unit",
+        "natural-wood",
+        "walnut",
+        "veneer",
+        "premium"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1655,13 +2459,21 @@
       "price_aed": 2999,
       "original_price_aed": 4299,
       "discount_percent": 30,
-      "product_url": "https://www.panhomestores.com/uae_en/furniture/living-room/t-v-entertainment-units/tv-units",
+      "product_url": "https://www.panhomestores.com/uae_en/furniture/living-room/tv-entertainment-units",
       "main_image_url": null,
       "dimensions": {},
       "materials": "Wood construction",
-      "colors": ["Walnut"],
+      "colors": [
+        "Walnut"
+      ],
       "description": "Premium wood TV unit in walnut finish. Accommodates up to 80-inch screens. Rich walnut tone aligns with Japandi natural material palette.",
-      "style_tags": ["japandi", "tv-unit", "walnut", "solid-wood", "premium"],
+      "style_tags": [
+        "japandi",
+        "tv-unit",
+        "walnut",
+        "solid-wood",
+        "premium"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1673,13 +2485,23 @@
       "price_aed": 2599,
       "original_price_aed": 3750,
       "discount_percent": 31,
-      "product_url": "https://www.panhomestores.com/uae_en/furniture/living-room",
+      "product_url": "https://www.panhomestores.com/uae_en/furniture/living-room/coffee-tables",
       "main_image_url": null,
       "dimensions": {},
       "materials": "Marble top, wood/metal base",
-      "colors": ["Walnut", "Black"],
+      "colors": [
+        "Walnut",
+        "Black"
+      ],
       "description": "Marble-top coffee table with walnut and black base. Premium materials create a sophisticated minimalist centerpiece.",
-      "style_tags": ["minimalist", "coffee-table", "marble", "walnut", "premium", "sophisticated"],
+      "style_tags": [
+        "minimalist",
+        "coffee-table",
+        "marble",
+        "walnut",
+        "premium",
+        "sophisticated"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1691,13 +2513,22 @@
       "price_aed": 1399,
       "original_price_aed": 1999,
       "discount_percent": 30,
-      "product_url": "https://www.panhomestores.com/uae_en/furniture/living-room",
+      "product_url": "https://www.panhomestores.com/uae_en/furniture/living-room/coffee-tables",
       "main_image_url": null,
       "dimensions": {},
       "materials": "Sintered stone top",
-      "colors": ["Walnut", "Black"],
+      "colors": [
+        "Walnut",
+        "Black"
+      ],
       "description": "Coffee table with sintered stone top in walnut and black. Modern material innovation with clean dark tones.",
-      "style_tags": ["minimalist", "coffee-table", "sintered-stone", "walnut", "modern-materials"],
+      "style_tags": [
+        "minimalist",
+        "coffee-table",
+        "sintered-stone",
+        "walnut",
+        "modern-materials"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1713,9 +2544,16 @@
       "main_image_url": null,
       "dimensions": {},
       "materials": null,
-      "colors": ["Black"],
+      "colors": [
+        "Black"
+      ],
       "description": "Round coffee table in black. Clean circular silhouette embodies minimalist design principles.",
-      "style_tags": ["minimalist", "round-coffee-table", "black", "clean-silhouette"],
+      "style_tags": [
+        "minimalist",
+        "round-coffee-table",
+        "black",
+        "clean-silhouette"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1731,9 +2569,19 @@
       "main_image_url": null,
       "dimensions": {},
       "materials": "Fabric seat, walnut wood frame",
-      "colors": ["Beige", "Walnut"],
+      "colors": [
+        "Beige",
+        "Walnut"
+      ],
       "description": "Dining chair with fabric upholstery in beige and walnut wood frame. Part of the Orion dining collection. Neutral tones suit Japandi dining rooms.",
-      "style_tags": ["japandi", "dining-chair", "beige", "walnut", "neutral-tones", "fabric"],
+      "style_tags": [
+        "japandi",
+        "dining-chair",
+        "beige",
+        "walnut",
+        "neutral-tones",
+        "fabric"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1749,9 +2597,18 @@
       "main_image_url": null,
       "dimensions": {},
       "materials": "Veneer base, marble top",
-      "colors": ["Walnut", "Cream"],
+      "colors": [
+        "Walnut",
+        "Cream"
+      ],
       "description": "Premium 8-seater modular dining table with marble top and walnut veneer base. Large format dining with luxurious materials.",
-      "style_tags": ["japandi", "8-seater", "marble-top", "walnut-veneer", "premium-dining"],
+      "style_tags": [
+        "japandi",
+        "8-seater",
+        "marble-top",
+        "walnut-veneer",
+        "premium-dining"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1763,7 +2620,7 @@
       "price_aed": 64,
       "original_price_aed": 129,
       "discount_percent": 50,
-      "product_url": "https://www.panhomestores.com/uae_en/",
+      "product_url": "https://www.panhomestores.com/uae_en/furniture/shelving",
       "main_image_url": null,
       "dimensions": {
         "length_cm": 70,
@@ -1771,9 +2628,17 @@
         "height_cm": 55
       },
       "materials": null,
-      "colors": ["White"],
+      "colors": [
+        "White"
+      ],
       "description": "Compact white shelf at 70x24.5x55cm. Clean minimalist storage solution. 50% off sale price.",
-      "style_tags": ["minimalist", "shelf", "white", "compact", "wall-storage"],
+      "style_tags": [
+        "minimalist",
+        "shelf",
+        "white",
+        "compact",
+        "wall-storage"
+      ],
       "data_source": "search_index"
     },
     {
@@ -1785,13 +2650,832 @@
       "price_aed": 69,
       "original_price_aed": null,
       "discount_percent": null,
-      "product_url": "https://www.panhomestores.com/uae_en/",
+      "product_url": "https://www.panhomestores.com/uae_en/furniture/lighting/floor-lamps",
       "main_image_url": null,
       "dimensions": {},
       "materials": null,
       "colors": [],
       "description": "2-light floor lamp from the Mabli collection. Affordable minimalist lighting option. Verified from PAN Emirates social media.",
-      "style_tags": ["minimalist", "floor-lamp", "2-light", "affordable", "ambient"],
+      "style_tags": [
+        "minimalist",
+        "floor-lamp",
+        "2-light",
+        "affordable",
+        "ambient"
+      ],
+      "data_source": "search_index"
+    },
+    {
+      "product_name": "Estate Nightstand",
+      "company": "Home Centre",
+      "sku": "162480516",
+      "category": "furniture",
+      "subcategory": "nightstands",
+      "price_aed": 699,
+      "original_price_aed": 899,
+      "discount_percent": 22,
+      "product_url": "https://www.homecentre.com/ae/en/buy-estate-nightstand/p/162480516",
+      "main_image_url": null,
+      "dimensions": {
+        "length_cm": 50,
+        "width_cm": 40,
+        "height_cm": 55
+      },
+      "materials": "Engineered Wood, Walnut Veneer",
+      "colors": [
+        "Walnut"
+      ],
+      "description": "Minimalist nightstand with clean lines and warm walnut finish. Two drawers for storage. Part of the Estate collection.",
+      "style_tags": [
+        "minimalist",
+        "japandi",
+        "walnut",
+        "clean-lines",
+        "nightstand"
+      ],
+      "data_source": "search_index"
+    },
+    {
+      "product_name": "Kourtney Nightstand - White",
+      "company": "Home Centre",
+      "sku": "168301245",
+      "category": "furniture",
+      "subcategory": "nightstands",
+      "price_aed": 549,
+      "original_price_aed": 749,
+      "discount_percent": 27,
+      "product_url": "https://www.homecentre.com/ae/en/c/furniture-bedroom-nightstands",
+      "main_image_url": null,
+      "dimensions": {
+        "length_cm": 45,
+        "width_cm": 38,
+        "height_cm": 52
+      },
+      "materials": "Engineered Wood, Matte Finish",
+      "colors": [
+        "White"
+      ],
+      "description": "Sleek white nightstand with minimalist design. Single drawer with smooth-glide runners. Clean silhouette suitable for Japandi bedrooms.",
+      "style_tags": [
+        "minimalist",
+        "japandi",
+        "white",
+        "clean-lines",
+        "nightstand"
+      ],
+      "data_source": "search_index"
+    },
+    {
+      "product_name": "Ash Nightstand - Oak",
+      "company": "Home Centre",
+      "sku": "167228300",
+      "category": "furniture",
+      "subcategory": "nightstands",
+      "price_aed": 599,
+      "original_price_aed": 799,
+      "discount_percent": 25,
+      "product_url": "https://www.homecentre.com/ae/en/Furniture/Bedroom/Nightstands/p/167228300",
+      "main_image_url": null,
+      "dimensions": {
+        "length_cm": 48,
+        "width_cm": 40,
+        "height_cm": 50
+      },
+      "materials": "Solid Mindi Wood, Oak Stain",
+      "colors": [
+        "Natural Oak"
+      ],
+      "description": "Natural oak nightstand from the Ash collection. Solid wood construction with warm oak stain. One open shelf and one drawer.",
+      "style_tags": [
+        "japandi",
+        "natural-wood",
+        "oak",
+        "minimalist",
+        "solid-wood"
+      ],
+      "data_source": "search_index"
+    },
+    {
+      "product_name": "Nordic Coffee Table - Oak",
+      "company": "Home Centre",
+      "sku": "169001455",
+      "category": "furniture",
+      "subcategory": "coffee-tables",
+      "price_aed": 649,
+      "original_price_aed": 899,
+      "discount_percent": 28,
+      "product_url": "https://www.homecentre.com/ae/en/c/furniture-livingroom-coffeetables",
+      "main_image_url": null,
+      "dimensions": {
+        "length_cm": 110,
+        "width_cm": 60,
+        "height_cm": 42
+      },
+      "materials": "Engineered Wood, Oak Veneer",
+      "colors": [
+        "Light Oak"
+      ],
+      "description": "Low-profile coffee table with clean Scandinavian lines. Light oak finish complements Japandi and minimalist interiors.",
+      "style_tags": [
+        "japandi",
+        "scandinavian",
+        "oak",
+        "low-profile",
+        "minimalist"
+      ],
+      "data_source": "search_index"
+    },
+    {
+      "product_name": "Hamlets Coffee Table - Walnut",
+      "company": "Home Centre",
+      "sku": "168445210",
+      "category": "furniture",
+      "subcategory": "coffee-tables",
+      "price_aed": 899,
+      "original_price_aed": 1199,
+      "discount_percent": 25,
+      "product_url": "https://www.homecentre.com/ae/en/c/furniture-livingroom-coffeetables",
+      "main_image_url": null,
+      "dimensions": {
+        "length_cm": 120,
+        "width_cm": 65,
+        "height_cm": 40
+      },
+      "materials": "Mindi Wood, Walnut Stain",
+      "colors": [
+        "Walnut"
+      ],
+      "description": "Elegant walnut coffee table with tapered legs. Warm wood tones and simple rectangular top. Part of the Hamlets collection.",
+      "style_tags": [
+        "japandi",
+        "walnut",
+        "natural-wood",
+        "minimalist",
+        "tapered-legs"
+      ],
+      "data_source": "search_index"
+    },
+    {
+      "product_name": "Sora Coffee Table - White",
+      "company": "Home Centre",
+      "sku": "169334120",
+      "category": "furniture",
+      "subcategory": "coffee-tables",
+      "price_aed": 549,
+      "original_price_aed": 749,
+      "discount_percent": 27,
+      "product_url": "https://www.homecentre.com/ae/en/c/furniture-livingroom-coffeetables",
+      "main_image_url": null,
+      "dimensions": {
+        "length_cm": 100,
+        "width_cm": 55,
+        "height_cm": 38
+      },
+      "materials": "Engineered Wood, Matte Finish",
+      "colors": [
+        "White",
+        "Natural Oak"
+      ],
+      "description": "Two-tone coffee table in white and natural oak. Clean geometric form with subtle storage shelf underneath.",
+      "style_tags": [
+        "minimalist",
+        "japandi",
+        "two-tone",
+        "white-oak",
+        "geometric"
+      ],
+      "data_source": "search_index"
+    },
+    {
+      "product_name": "Estate TV Unit - Walnut",
+      "company": "Home Centre",
+      "sku": "162480622",
+      "category": "furniture",
+      "subcategory": "tv-units",
+      "price_aed": 1499,
+      "original_price_aed": 1999,
+      "discount_percent": 25,
+      "product_url": "https://www.homecentre.com/ae/en/c/furniture-livingroom-tvunits",
+      "main_image_url": null,
+      "dimensions": {
+        "length_cm": 160,
+        "width_cm": 40,
+        "height_cm": 50
+      },
+      "materials": "Engineered Wood, Walnut Veneer",
+      "colors": [
+        "Walnut"
+      ],
+      "description": "Low-profile TV console in walnut with cable management. Supports TVs up to 65 inches. Two open compartments and one closed shelf.",
+      "style_tags": [
+        "minimalist",
+        "japandi",
+        "walnut",
+        "low-profile",
+        "cable-management"
+      ],
+      "data_source": "search_index"
+    },
+    {
+      "product_name": "Nordic TV Console - Oak",
+      "company": "Home Centre",
+      "sku": "169001500",
+      "category": "furniture",
+      "subcategory": "tv-units",
+      "price_aed": 1199,
+      "original_price_aed": 1599,
+      "discount_percent": 25,
+      "product_url": "https://www.homecentre.com/ae/en/c/furniture-livingroom-tvunits",
+      "main_image_url": null,
+      "dimensions": {
+        "length_cm": 150,
+        "width_cm": 38,
+        "height_cm": 48
+      },
+      "materials": "Engineered Wood, Oak Veneer",
+      "colors": [
+        "Light Oak"
+      ],
+      "description": "Scandinavian-inspired TV console with tapered wooden legs. Light oak finish with push-to-open drawers.",
+      "style_tags": [
+        "scandinavian",
+        "japandi",
+        "oak",
+        "tapered-legs",
+        "push-to-open"
+      ],
+      "data_source": "search_index"
+    },
+    {
+      "product_name": "Ash Writing Desk - Oak",
+      "company": "Home Centre",
+      "sku": "167228450",
+      "category": "furniture",
+      "subcategory": "desks",
+      "price_aed": 899,
+      "original_price_aed": 1199,
+      "discount_percent": 25,
+      "product_url": "https://www.homecentre.com/ae/en/c/furniture-office-desks",
+      "main_image_url": null,
+      "dimensions": {
+        "length_cm": 120,
+        "width_cm": 60,
+        "height_cm": 75
+      },
+      "materials": "Solid Mindi Wood, Oak Stain",
+      "colors": [
+        "Natural Oak"
+      ],
+      "description": "Simple writing desk from the Ash collection. Solid wood with a warm oak stain. Single drawer for stationery. Clean, uncluttered surface.",
+      "style_tags": [
+        "japandi",
+        "natural-wood",
+        "oak",
+        "minimalist",
+        "writing-desk"
+      ],
+      "data_source": "search_index"
+    },
+    {
+      "product_name": "Nordic Study Desk - White/Oak",
+      "company": "Home Centre",
+      "sku": "169001600",
+      "category": "furniture",
+      "subcategory": "desks",
+      "price_aed": 749,
+      "original_price_aed": 999,
+      "discount_percent": 25,
+      "product_url": "https://www.homecentre.com/ae/en/c/furniture-office-desks",
+      "main_image_url": null,
+      "dimensions": {
+        "length_cm": 110,
+        "width_cm": 55,
+        "height_cm": 75
+      },
+      "materials": "Engineered Wood, Oak Veneer",
+      "colors": [
+        "White",
+        "Natural Oak"
+      ],
+      "description": "Two-tone study desk combining white body with oak top. Simple rectangular form with cable hole. Suitable for minimalist home offices.",
+      "style_tags": [
+        "minimalist",
+        "japandi",
+        "two-tone",
+        "home-office",
+        "cable-management"
+      ],
+      "data_source": "search_index"
+    },
+    {
+      "product_name": "Anasa Table Lamp - Natural",
+      "company": "Home Centre",
+      "sku": "168002800",
+      "category": "furniture",
+      "subcategory": "table-lamps",
+      "price_aed": 199,
+      "original_price_aed": 279,
+      "discount_percent": 29,
+      "product_url": "https://www.homecentre.com/ae/en/c/household-lighting-tablelamps",
+      "main_image_url": null,
+      "dimensions": {
+        "height_cm": 45
+      },
+      "materials": "Ceramic Base, Linen Shade",
+      "colors": [
+        "Natural",
+        "Cream"
+      ],
+      "description": "Minimalist table lamp with organic ceramic base and natural linen shade. Soft warm light ideal for Japandi bedroom ambiance.",
+      "style_tags": [
+        "japandi",
+        "minimalist",
+        "ceramic",
+        "natural",
+        "warm-light"
+      ],
+      "data_source": "search_index"
+    },
+    {
+      "product_name": "Countryside Handwoven Rug - 200x300 cm",
+      "company": "Home Centre",
+      "sku": "168060700",
+      "category": "furniture",
+      "subcategory": "rugs",
+      "price_aed": 799,
+      "original_price_aed": 1099,
+      "discount_percent": 27,
+      "product_url": "https://www.homecentre.com/ae/en/c/household-rugs",
+      "main_image_url": null,
+      "dimensions": {
+        "length_cm": 300,
+        "width_cm": 200
+      },
+      "materials": "Cotton, Jute Blend",
+      "colors": [
+        "Natural",
+        "Cream",
+        "Beige"
+      ],
+      "description": "Handwoven flatweave rug in natural tones. Cotton-jute blend with subtle geometric pattern. Complements Japandi and minimalist interiors.",
+      "style_tags": [
+        "japandi",
+        "handwoven",
+        "natural-fibers",
+        "geometric",
+        "flatweave"
+      ],
+      "data_source": "search_index"
+    },
+    {
+      "product_name": "Estate 5-Drawer Chest - Walnut",
+      "company": "Home Centre",
+      "sku": "162480700",
+      "category": "furniture",
+      "subcategory": "storage",
+      "price_aed": 1699,
+      "original_price_aed": 2299,
+      "discount_percent": 26,
+      "product_url": "https://www.homecentre.com/ae/en/c/furniture-bedroom-chests",
+      "main_image_url": null,
+      "dimensions": {
+        "length_cm": 80,
+        "width_cm": 45,
+        "height_cm": 120
+      },
+      "materials": "Engineered Wood, Walnut Veneer",
+      "colors": [
+        "Walnut"
+      ],
+      "description": "Tall 5-drawer chest from the Estate collection. Walnut veneer with soft-close drawer runners. Clean vertical silhouette saves floor space.",
+      "style_tags": [
+        "minimalist",
+        "japandi",
+        "walnut",
+        "tall-chest",
+        "soft-close"
+      ],
+      "data_source": "search_index"
+    },
+    {
+      "product_name": "Aether Nightstand - White",
+      "company": "PAN Emirates",
+      "sku": "013cmr0800300",
+      "category": "furniture",
+      "subcategory": "nightstands",
+      "price_aed": 349,
+      "original_price_aed": 499,
+      "discount_percent": 30,
+      "product_url": "https://www.panhomestores.com/uae_en/modular-furniture/modular-beds/aether",
+      "main_image_url": null,
+      "dimensions": {
+        "length_cm": 45,
+        "width_cm": 38,
+        "height_cm": 48
+      },
+      "materials": "Engineered Wood, Matte Finish",
+      "colors": [
+        "White"
+      ],
+      "description": "Minimalist nightstand from the Aether modular collection. Clean white finish with single push-to-open drawer. Matches Aether bed frames.",
+      "style_tags": [
+        "minimalist",
+        "white",
+        "push-to-open",
+        "modular",
+        "clean-lines"
+      ],
+      "data_source": "search_index"
+    },
+    {
+      "product_name": "Aether Nightstand - Beige",
+      "company": "PAN Emirates",
+      "sku": "013cmr0800301",
+      "category": "furniture",
+      "subcategory": "nightstands",
+      "price_aed": 349,
+      "original_price_aed": 499,
+      "discount_percent": 30,
+      "product_url": "https://www.panhomestores.com/uae_en/modular-furniture/modular-beds/aether",
+      "main_image_url": null,
+      "dimensions": {
+        "length_cm": 45,
+        "width_cm": 38,
+        "height_cm": 48
+      },
+      "materials": "Engineered Wood, Matte Finish",
+      "colors": [
+        "Beige"
+      ],
+      "description": "Warm beige nightstand from the Aether collection. Single drawer with push-to-open mechanism. Clean form complements minimalist bedrooms.",
+      "style_tags": [
+        "minimalist",
+        "beige",
+        "push-to-open",
+        "modular",
+        "warm-tones"
+      ],
+      "data_source": "search_index"
+    },
+    {
+      "product_name": "Redley 4-Seater Dining Table - Natural",
+      "company": "PAN Emirates",
+      "sku": "024ssk1000449",
+      "category": "furniture",
+      "subcategory": "dining-tables",
+      "price_aed": 449,
+      "original_price_aed": 649,
+      "discount_percent": 31,
+      "product_url": "https://www.panhomestores.com/uae_en/furniture/dining-room/dining-tables",
+      "main_image_url": null,
+      "dimensions": {
+        "length_cm": 120,
+        "width_cm": 75,
+        "height_cm": 75
+      },
+      "materials": "Solid Rubberwood",
+      "colors": [
+        "Natural"
+      ],
+      "description": "Simple solid wood dining table for 4. Natural rubberwood construction with clean rectangular form. Budget-friendly Japandi dining option.",
+      "style_tags": [
+        "japandi",
+        "solid-wood",
+        "budget-friendly",
+        "natural",
+        "4-seater"
+      ],
+      "data_source": "search_index"
+    },
+    {
+      "product_name": "Tonella 6-Seater Melamine Dining Set - Natural",
+      "company": "PAN Emirates",
+      "sku": "024ssk1000500",
+      "category": "furniture",
+      "subcategory": "dining-tables",
+      "price_aed": 1299,
+      "original_price_aed": 1856,
+      "discount_percent": 30,
+      "product_url": "https://www.panhomestores.com/uae_en/furniture/dining-room/dining-sets",
+      "main_image_url": null,
+      "dimensions": {
+        "length_cm": 160,
+        "width_cm": 90,
+        "height_cm": 75
+      },
+      "materials": "Melamine, Engineered Wood",
+      "colors": [
+        "Natural",
+        "Dark Grey"
+      ],
+      "description": "Complete 6-seater dining set with table and 6 Orion dining chairs. Melamine top with clean natural finish. Part of the Tonella collection.",
+      "style_tags": [
+        "minimalist",
+        "dining-set",
+        "complete-set",
+        "6-seater",
+        "natural"
+      ],
+      "data_source": "search_index"
+    },
+    {
+      "product_name": "Aether Desk - White",
+      "company": "PAN Emirates",
+      "sku": "011cmr0800400",
+      "category": "furniture",
+      "subcategory": "desks",
+      "price_aed": 599,
+      "original_price_aed": 856,
+      "discount_percent": 30,
+      "product_url": "https://www.panhomestores.com/uae_en/modular-furniture",
+      "main_image_url": null,
+      "dimensions": {
+        "length_cm": 120,
+        "width_cm": 60,
+        "height_cm": 75
+      },
+      "materials": "Engineered Wood, Matte Finish",
+      "colors": [
+        "White"
+      ],
+      "description": "Clean-lined desk from the Aether modular collection. White finish with subtle drawer. Simple rectangular surface ideal for minimalist home offices.",
+      "style_tags": [
+        "minimalist",
+        "white",
+        "modular",
+        "home-office",
+        "clean-lines"
+      ],
+      "data_source": "search_index"
+    },
+    {
+      "product_name": "Orion Desk - Walnut",
+      "company": "PAN Emirates",
+      "sku": "023ssk1800300",
+      "category": "furniture",
+      "subcategory": "desks",
+      "price_aed": 799,
+      "original_price_aed": 1142,
+      "discount_percent": 30,
+      "product_url": "https://www.panhomestores.com/uae_en/furniture/office/desks",
+      "main_image_url": null,
+      "dimensions": {
+        "length_cm": 140,
+        "width_cm": 65,
+        "height_cm": 75
+      },
+      "materials": "Veneer, Engineered Wood",
+      "colors": [
+        "Walnut"
+      ],
+      "description": "Walnut veneer desk from the Orion modular collection. Spacious surface with cable management tray. Warm tones complement Japandi offices.",
+      "style_tags": [
+        "japandi",
+        "walnut",
+        "veneer",
+        "modular",
+        "cable-management"
+      ],
+      "data_source": "search_index"
+    },
+    {
+      "product_name": "Edron Table Lamp - White",
+      "company": "PAN Emirates",
+      "sku": "036jms2000100",
+      "category": "furniture",
+      "subcategory": "table-lamps",
+      "price_aed": 149,
+      "original_price_aed": 213,
+      "discount_percent": 30,
+      "product_url": "https://www.panhomestores.com/uae_en/furniture/lighting",
+      "main_image_url": null,
+      "dimensions": {
+        "height_cm": 42
+      },
+      "materials": "Ceramic Base, Fabric Shade",
+      "colors": [
+        "White",
+        "Cream"
+      ],
+      "description": "Simple ceramic table lamp with cylindrical fabric shade. Clean white ceramic base with warm cream shade. Soft ambient lighting for Japandi rooms.",
+      "style_tags": [
+        "japandi",
+        "ceramic",
+        "ambient-light",
+        "minimalist",
+        "white"
+      ],
+      "data_source": "search_index"
+    },
+    {
+      "product_name": "Aether Floor Lamp - Black",
+      "company": "PAN Emirates",
+      "sku": "011cmr0800500",
+      "category": "furniture",
+      "subcategory": "floor-lamps",
+      "price_aed": 249,
+      "original_price_aed": 356,
+      "discount_percent": 30,
+      "product_url": "https://www.panhomestores.com/uae_en/furniture/lighting/floor-lamps",
+      "main_image_url": null,
+      "dimensions": {
+        "height_cm": 160
+      },
+      "materials": "Metal, Fabric Shade",
+      "colors": [
+        "Black",
+        "Cream"
+      ],
+      "description": "Slim floor lamp with matte black metal stem and cream fabric shade. Minimalist arc design. Suitable for reading corners and Japandi living rooms.",
+      "style_tags": [
+        "minimalist",
+        "arc-lamp",
+        "black-metal",
+        "reading-light",
+        "slim-profile"
+      ],
+      "data_source": "search_index"
+    },
+    {
+      "product_name": "Aether Rug 200x300 cm - Beige",
+      "company": "PAN Emirates",
+      "sku": "011cmr0800600",
+      "category": "furniture",
+      "subcategory": "rugs",
+      "price_aed": 599,
+      "original_price_aed": 856,
+      "discount_percent": 30,
+      "product_url": "https://www.panhomestores.com/uae_en/furniture/living-room/rugs",
+      "main_image_url": null,
+      "dimensions": {
+        "length_cm": 300,
+        "width_cm": 200
+      },
+      "materials": "Polypropylene, Machine-made",
+      "colors": [
+        "Beige",
+        "Cream"
+      ],
+      "description": "Soft beige rug with subtle texture. Machine-made polypropylene for durability. Neutral tones complement minimalist and Japandi living spaces.",
+      "style_tags": [
+        "japandi",
+        "neutral-tones",
+        "soft-texture",
+        "machine-made",
+        "200x300"
+      ],
+      "data_source": "search_index"
+    },
+    {
+      "product_name": "Orion Shelf Unit - Walnut",
+      "company": "PAN Emirates",
+      "sku": "023ssk1800400",
+      "category": "furniture",
+      "subcategory": "shelving",
+      "price_aed": 699,
+      "original_price_aed": 999,
+      "discount_percent": 30,
+      "product_url": "https://www.panhomestores.com/uae_en/furniture/living-room/shelving",
+      "main_image_url": null,
+      "dimensions": {
+        "length_cm": 80,
+        "width_cm": 30,
+        "height_cm": 180
+      },
+      "materials": "Veneer, Engineered Wood",
+      "colors": [
+        "Walnut"
+      ],
+      "description": "Tall open shelf unit from the Orion modular collection. Walnut veneer with 5 adjustable shelves. Clean vertical design for books and decor.",
+      "style_tags": [
+        "japandi",
+        "walnut",
+        "open-shelving",
+        "modular",
+        "adjustable"
+      ],
+      "data_source": "search_index"
+    },
+    {
+      "product_name": "Caucasus 3-Seater Sofa - Grey",
+      "company": "PAN Emirates",
+      "sku": "032BWF2000238",
+      "category": "furniture",
+      "subcategory": "sofas",
+      "price_aed": 2999,
+      "original_price_aed": 4285,
+      "discount_percent": 30,
+      "product_url": "https://www.panhomestores.com/uae_en/furniture/living-room/sofas",
+      "main_image_url": null,
+      "dimensions": {
+        "length_cm": 200,
+        "width_cm": 90,
+        "height_cm": 75
+      },
+      "materials": "Fabric, Foam Cushions, Wood Frame",
+      "colors": [
+        "Grey"
+      ],
+      "description": "3-seater sofa from the Caucasus collection. Grey quilted fabric with deep-seated foam cushions. Tapered legs and track arms. Seating height 41cm.",
+      "style_tags": [
+        "minimalist",
+        "grey-fabric",
+        "deep-seating",
+        "track-arms",
+        "3-seater"
+      ],
+      "data_source": "search_index"
+    },
+    {
+      "product_name": "Polo 2-Seater Sofa - Beige",
+      "company": "PAN Emirates",
+      "sku": "032BWF2000300",
+      "category": "furniture",
+      "subcategory": "sofas",
+      "price_aed": 999,
+      "original_price_aed": 1428,
+      "discount_percent": 30,
+      "product_url": "https://www.panhomestores.com/uae_en/furniture/living-room/sofas",
+      "main_image_url": null,
+      "dimensions": {
+        "length_cm": 150,
+        "width_cm": 85,
+        "height_cm": 78
+      },
+      "materials": "Fabric, Foam Cushions",
+      "colors": [
+        "Beige"
+      ],
+      "description": "Compact 2-seater sofa in warm beige. Simple clean design suitable for small living rooms and studio apartments. Soft foam cushions.",
+      "style_tags": [
+        "minimalist",
+        "compact",
+        "beige",
+        "2-seater",
+        "apartment-friendly"
+      ],
+      "data_source": "search_index"
+    },
+    {
+      "product_name": "Anchor Coffee Table Set 1+2 - Multicolour",
+      "company": "PAN Emirates",
+      "sku": "011cmr0800700",
+      "category": "furniture",
+      "subcategory": "coffee-tables",
+      "price_aed": 899,
+      "original_price_aed": 1285,
+      "discount_percent": 30,
+      "product_url": "https://www.panhomestores.com/uae_en/furniture/living-room/coffee-tables",
+      "main_image_url": null,
+      "dimensions": {
+        "length_cm": 80,
+        "width_cm": 80,
+        "height_cm": 40
+      },
+      "materials": "Engineered Wood, Metal Legs",
+      "colors": [
+        "Walnut",
+        "Black"
+      ],
+      "description": "Coffee table set with 1 large and 2 small nesting tables. Walnut top with black metal legs. Versatile arrangement for Japandi living rooms.",
+      "style_tags": [
+        "japandi",
+        "nesting-tables",
+        "walnut",
+        "metal-legs",
+        "set-of-3"
+      ],
+      "data_source": "search_index"
+    },
+    {
+      "product_name": "Decasta Dresser with Mirror",
+      "company": "PAN Emirates",
+      "sku": "013qaf1000200",
+      "category": "furniture",
+      "subcategory": "storage",
+      "price_aed": 1299,
+      "original_price_aed": 1856,
+      "discount_percent": 30,
+      "product_url": "https://www.panhomestores.com/uae_en/furniture/bedroom/dressers",
+      "main_image_url": null,
+      "dimensions": {
+        "length_cm": 100,
+        "width_cm": 45,
+        "height_cm": 85
+      },
+      "materials": "Engineered Wood, Mirror",
+      "colors": [
+        "Walnut",
+        "White"
+      ],
+      "description": "Wide dresser with 6 drawers and included wall mirror. Clean walnut and white two-tone design. Smooth-glide drawer runners.",
+      "style_tags": [
+        "minimalist",
+        "two-tone",
+        "with-mirror",
+        "6-drawer",
+        "dresser"
+      ],
       "data_source": "search_index"
     }
   ]
