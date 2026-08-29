@@ -61,6 +61,8 @@ export default function DesignResultPage() {
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(true); // Designs auto-save on generation
   const [vizExpanded, setVizExpanded] = useState(false);
+  const [vizError, setVizError] = useState(false);
+  const [vizLoaded, setVizLoaded] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -122,7 +124,7 @@ export default function DesignResultPage() {
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-brand-50/40 pb-20">
       {/* Expanded visualization modal */}
-      {vizExpanded && design.visualization_url && (
+      {vizExpanded && design.visualization_url && !vizError && (
         <div
           className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
           onClick={() => setVizExpanded(false)}
@@ -131,7 +133,14 @@ export default function DesignResultPage() {
             src={design.visualization_url}
             alt="Room visualization"
             className="max-w-full max-h-full rounded-xl shadow-2xl"
+            onError={() => setVizExpanded(false)}
           />
+          <button
+            className="absolute top-4 right-4 bg-white/20 hover:bg-white/40 text-white rounded-full p-2 transition-colors"
+            onClick={() => setVizExpanded(false)}
+          >
+            <ArrowLeft className="w-5 h-5 rotate-45" />
+          </button>
         </div>
       )}
 
@@ -187,13 +196,21 @@ export default function DesignResultPage() {
           {/* Visualization — takes 2 columns */}
           <div className="lg:col-span-2">
             <div className="relative rounded-2xl overflow-hidden bg-brand-100 aspect-[16/10] group cursor-pointer shadow-sm"
-              onClick={() => setVizExpanded(true)}>
-              {design.visualization_url ? (
+              onClick={() => !vizError && setVizExpanded(true)}>
+              {design.visualization_url && !vizError ? (
                 <>
+                  {!vizLoaded && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10 bg-brand-100">
+                      <div className="w-10 h-10 border-3 border-brand-300 border-t-brand-600 rounded-full animate-spin" />
+                      <p className="text-xs text-brand-500">Generating visualization...</p>
+                    </div>
+                  )}
                   <img
                     src={design.visualization_url}
                     alt="Room visualization"
-                    className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-700"
+                    className={`w-full h-full object-cover group-hover:scale-102 transition-all duration-700 ${vizLoaded ? "opacity-100" : "opacity-0"}`}
+                    onLoad={() => setVizLoaded(true)}
+                    onError={() => setVizError(true)}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                   <button className="absolute top-3 right-3 bg-white/80 backdrop-blur-sm text-brand-700 p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
@@ -203,7 +220,20 @@ export default function DesignResultPage() {
               ) : (
                 <div className="w-full h-full flex flex-col items-center justify-center text-brand-300">
                   <Sparkles className="w-12 h-12 mb-3" />
-                  <p className="text-sm">Visualization unavailable</p>
+                  <p className="text-sm">
+                    {vizError ? "Visualization failed to load" : "Visualization unavailable"}
+                  </p>
+                  {vizError && design.visualization_url && (
+                    <a
+                      href={design.visualization_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-2 text-xs text-brand-500 underline hover:text-brand-700"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Open image directly
+                    </a>
+                  )}
                 </div>
               )}
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent p-3">

@@ -13,6 +13,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const { t, currency } = useApp();
   const [designs, setDesigns] = useState<Record<string, unknown>[] | null>(null);
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -93,11 +94,14 @@ export default function DashboardPage() {
               className="bg-white rounded-xl border border-brand-100 overflow-hidden hover:shadow-md transition-shadow group"
             >
               <div className="aspect-[16/10] bg-brand-50 relative overflow-hidden">
-                {d.visualization_url ? (
+                {d.visualization_url && !failedImages.has(String(d.id)) ? (
                   <img
                     src={String(d.visualization_url)}
                     alt="Design"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    onError={() => {
+                      setFailedImages((prev) => new Set(prev).add(String(d.id)));
+                    }}
                   />
                 ) : (
                   <div className="w-full h-full flex flex-col items-center justify-center gap-2">
