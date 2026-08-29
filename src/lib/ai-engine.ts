@@ -16,7 +16,18 @@ import type {
 import { readFileSync, existsSync } from "fs";
 import path from "path";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+// Read key from env — the correct key is set in .env.local as AINTERIOR_GEMINI_KEY
+// to avoid pollution from other projects on this machine that may set GEMINI_API_KEY.
+const GEMINI_API_KEY =
+  process.env.AINTERIOR_GEMINI_KEY ||
+  process.env.GEMINI_API_KEY ||
+  "";
+
+if (!GEMINI_API_KEY) {
+  console.error("[ai-engine] AINTERIOR_GEMINI_KEY is not set — AI features will fail");
+}
+
+const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
 // Safety settings — relaxed for interior design content
 const safetySettings = [
