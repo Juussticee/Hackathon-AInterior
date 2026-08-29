@@ -343,21 +343,84 @@ export async function generateVisualization(
   const style = getStyleBySlug(styleSlug);
   if (!style) return null;
 
-  // Build a concise prompt — shorter prompts generate faster and more reliably
-  const keyProducts = selectedProducts
-    .slice(0, 4)
-    .map((sp) => sp.product.name)
+  // Build rich visual descriptions for each product instead of raw names.
+  // Image models understand "queen bed in light walnut wood" but NOT
+  // "Supreme 160X200 Queen Bed - Light Walnut".
+  const visualItems = selectedProducts.slice(0, 8).map((sp) => {
+    const p = sp.product as unknown as Record<string, string>;
+    const subcategory = (sp.category || p.subcategory || "furniture")
+      .replace(/-/g, " ")
+      .replace(/_/g, " ");
+
+    // Parse colors (stored as JSON array string in DB)
+    let colors: string[] = [];
+    try {
+      colors = JSON.parse(p.colors || "[]");
+    } catch {
+      colors = [];
+    }
+    const primaryColor = colors[0] || "";
+
+    // Parse materials
+    const materials = (p.materials || "")
+      .split(",")
+      .map((m: string) => m.trim().toLowerCase())
+      .filter(Boolean);
+    const keyMaterial = materials[0] || "";
+
+    // Build visual phrase: "light walnut wood queen bed"
+    const parts: string[] = [];
+    if (primaryColor) parts.push(primaryColor.toLowerCase());
+    if (keyMaterial && !primaryColor.toLowerCase().includes(keyMaterial)) {
+      parts.push(keyMaterial);
+    }
+    parts.push(subcategory);
+
+    return parts.join(" ");
+  });
+
+  // Group similar items for brevity (e.g., "2 light walnut nightstands")
+  const itemCounts = new Map<string, number>();
+  for (const item of visualItems) {
+    itemCounts.set(item, (itemCounts.get(item) || 0) + 1);
+  }
+  const furnitureDescriptions = Array.from(itemCounts.entries())
+    .map(([desc, count]) => (count > 1 ? `${count} ${desc}s` : desc))
+    .join(", ");
+
+  // Extract style visual cues
+  const styleColors = style.colorPalette.primary.slice(0, 3)
+    .map((hex) => {
+      // Convert hex to readable name approximation
+      const names: Record<string, string> = {
+        "#FFFFFF": "white", "#F5F5F5": "light grey", "#E0E0E0": "grey",
+        "#9E9E9E": "medium grey", "#212121": "charcoal", "#424242": "dark grey",
+        "#616161": "grey", "#F5F0EB": "warm cream", "#E8DDD3": "warm beige",
+        "#D4C5B5": "sand", "#C4A882": "golden oak", "#8B7355": "warm brown",
+        "#6B5B45": "dark brown", "#4A4035": "espresso", "#2C2418": "dark chocolate",
+      };
+      return names[hex] || hex;
+    })
     .join(", ");
 
   const prompt = [
     `Professional interior design photograph of a ${spaceAnalysis.roomType.replace("_", " ")}`,
-    `${style.name} style`,
-    `${spaceAnalysis.estimatedAreaSqm.toFixed(0)} sqm`,
-    `furniture: ${keyProducts}`,
-    "photorealistic, magazine quality, soft natural lighting, 8k",
+    `${style.name} style interior`,
+    `${spaceAnalysis.estimatedAreaSqm.toFixed(0)} square meter room`,
+    `furniture: ${furnitureDescriptions}`,
+    `walls and textiles in ${styleColors}`,
+    style.materials.length > 0
+      ? `materials: ${style.materials.slice(0, 4).join(", ")}`
+      : null,
+    style.lightingPreference
+      ? style.lightingPreference
+      : "soft natural lighting",
+    "photorealistic, magazine quality, professional staging, 8k resolution, architectural photography",
   ]
     .filter(Boolean)
     .join(", ");
+
+  console.log("[viz] Prompt:", prompt.slice(0, 200));
 
   try {
     const encoded = encodeURIComponent(prompt);
