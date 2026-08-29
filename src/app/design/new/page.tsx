@@ -158,8 +158,12 @@ export default function NewDesignPage() {
     // Client-side validation guard — prevents sending malformed data
     const lenNum = Number(roomLength);
     const widNum = Number(roomWidth);
-    if (!roomLength || !roomWidth || lenNum < 100 || widNum < 100) {
-      setError("Please go back and fill in valid room dimensions (min 100 cm).");
+    if (!roomLength || !roomWidth || lenNum < 100 || lenNum > 2000 || widNum < 100 || widNum > 2000) {
+      setError("Please go back and fill in valid room dimensions (100–2000 cm).");
+      return;
+    }
+    if (roomHeight && (Number(roomHeight) < 150 || Number(roomHeight) > 600)) {
+      setError("Room height must be between 150 cm and 600 cm. Please go back and fix it.");
       return;
     }
     if (!style) {
@@ -223,11 +227,11 @@ export default function NewDesignPage() {
     }
   }
 
-  const canProceedStep1 =
-    roomLength &&
-    roomWidth &&
-    Number(roomLength) >= 100 &&
-    Number(roomWidth) >= 100;
+  const lenOk = Number(roomLength) >= 100 && Number(roomLength) <= 2000;
+  const widOk = Number(roomWidth) >= 100 && Number(roomWidth) <= 2000;
+  const hgtOk =
+    !roomHeight || (Number(roomHeight) >= 150 && Number(roomHeight) <= 600);
+  const canProceedStep1 = roomLength && roomWidth && lenOk && widOk && hgtOk;
   const canProceedStep2 = budget > 0;
 
   if (status === "loading") {
@@ -462,6 +466,7 @@ export default function NewDesignPage() {
                         placeholder="Length (cm)"
                         className="w-full px-3 py-2.5 border border-brand-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                         min={100}
+                        max={2000}
                       />
                     </div>
                     <div>
@@ -472,6 +477,7 @@ export default function NewDesignPage() {
                         placeholder="Width (cm)"
                         className="w-full px-3 py-2.5 border border-brand-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                         min={100}
+                        max={2000}
                       />
                     </div>
                     <div>
@@ -481,7 +487,8 @@ export default function NewDesignPage() {
                         onChange={(e) => setRoomHeight(e.target.value)}
                         placeholder="Height (optional)"
                         className="w-full px-3 py-2.5 border border-brand-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-                        min={200}
+                        min={150}
+                        max={600}
                       />
                     </div>
                   </div>
@@ -493,6 +500,11 @@ export default function NewDesignPage() {
                         (Number(roomWidth) / 100)
                       ).toFixed(1)}{" "}
                       m²
+                    </p>
+                  )}
+                  {roomHeight && !hgtOk && (
+                    <p className="text-xs text-red-500 mt-1.5">
+                      Height must be between 150 cm and 600 cm
                     </p>
                   )}
                 </div>
