@@ -152,12 +152,13 @@ export async function POST(
 
     return NextResponse.json(result);
   } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
     console.error("Design pipeline error:", error);
     db.prepare(
       "UPDATE design_projects SET status = 'failed', updated_at = datetime('now') WHERE id = ?"
     ).run(id);
     return NextResponse.json(
-      { error: "Design generation failed. Please try again." },
+      { error: `Design generation failed: ${message}` },
       { status: 500 }
     );
   }

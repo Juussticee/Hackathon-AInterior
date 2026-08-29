@@ -246,7 +246,7 @@ function parseUserCategories(text: string): string[] {
     sofa: ["sofa", "sofas", "couch"],
     desk: ["desk", "desks", "writing desk", "work desk"],
     rug: ["rug", "rugs", "carpet"],
-    lamp: ["lamp", "lamps", "light", "lights", "floor lamp", "table lamp", "lighting", "pendant"],
+    lamp: ["lamp", "lamps", "floor lamp", "table lamp", "pendant", "pendant light", "chandelier"],
     storage: ["storage", "shelf", "shelves", "bookshelf", "bookcase", "cabinet", "wardrobe"],
     mirror: ["mirror", "mirrors"],
     dresser: ["dresser", "dressers", "chest of drawers"],
@@ -337,7 +337,21 @@ export async function selectProducts(
     allCategories
   );
 
-  if (candidates.length === 0) {
+  // Fallback: if category filter is too restrictive, retry with style categories only
+  let finalCandidates = candidates;
+  if (candidates.length < 5 && userCategories.length > 0) {
+    console.warn(
+      `[selectProducts] Only ${candidates.length} candidates with all categories, retrying with style-only filter`
+    );
+    finalCandidates = filterProducts(
+      styleSlug,
+      spaceAnalysis.roomType,
+      budgetAed,
+      styleCategories
+    );
+  }
+
+  if (finalCandidates.length === 0) {
     throw new Error("No matching products found in catalog");
   }
 
@@ -410,7 +424,7 @@ Return ONLY valid JSON (no markdown):
     const parsed = JSON.parse(jsonText);
 
     const selected: SelectedProduct[] = [];
-    const validIds = new Set(candidates.map((c) => c.id));
+    const validIds = new Set(finalCandidates.map((c) => c.id));
 
     for (const item of parsed.selected || []) {
       if (validIds.has(item.product_id)) {
@@ -428,7 +442,7 @@ Return ONLY valid JSON (no markdown):
     if (userCategories.length > 0) {
       const selectedSubs = new Set(
         selected.map((s) => {
-          const prod = candidates.find((c) => c.id === s.productId);
+          const prod = finalCandidates.find((c) => c.id === s.productId);
           return (prod?.subcategory || "").toLowerCase().replace(/\s+/g, "-");
         })
       );
@@ -669,20 +683,33 @@ export async function runDesignPipeline(params: {
     "UPDATE design_projects SET status = 'processing', updated_at = datetime('now') WHERE id = ?"
   ).run(projectId);
 
-  // Stage 1: Analyze space
+  // Stage 1: Analyze space (has internal fallback — safe)
   const spaceAnalysis = await analyzeSpace(
     params.roomImageUrl,
     params.roomType,
     params.dimensions
   );
 
-  // Stage 2 + 3: Filter & select products
-  const selectedProducts = await selectProducts(
-    spaceAnalysis,
-    params.styleSlug,
-    params.budgetAed,
-    params.additionalRequirements
-  );
+  // Stage 2 + 3: Filter & select products (may throw if catalog is empty)
+  let selectedProducts: SelectedProduct[];
+  try {
+    selectedProducts = await selectProducts(
+      spaceAnalysis,
+      params.styleSlug,
+      params.budgetAed,
+      params.additionalRequirements
+    );
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[pipeline] Product selection failed:", msg);
+    // Retry without user requirements — style categories only
+    selectedProducts = await selectProducts(
+      spaceAnalysis,
+      params.styleSlug,
+      params.budgetAed,
+      null
+    );
+  }
 
   // Enrich with full product data from DB — batched WHERE IN to avoid N+1
   const productIds = selectedProducts.map((sp) => sp.productId);
