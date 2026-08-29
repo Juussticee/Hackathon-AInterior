@@ -54,6 +54,52 @@ export async function GET(
   return NextResponse.json({ design });
 }
 
+// DELETE /api/designs/[id] — Delete a design project
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const design = db
+    .prepare("SELECT id, user_id, visualization_url FROM design_projects WHERE id = ?")
+    .get(id) as { id: string; user_id: string; visualization_url: string | null } | undefined;
+
+  if (!design) {
+    return NextResponse.json({ error: "Design not found" }, { status: 404 });
+  }
+
+  const userId = (session.user as { id: string }).id;
+  const userRole = (session.user as { role?: string }).role;
+  if (design.user_id !== userId && userRole !== "admin") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  try {
+    // Delete the design row
+    db.prepare("DELETE FROM design_projects WHERE id = ?").run(id);
+
+    // Clean up local visualization file if it exists
+    if (design.visualization_url?.startsWith("/uploads/")) {
+      const fs = await import("fs");
+      const path = await import("path");
+      const filePath = path.join(process.cwd(), "public", design.visualization_url);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Delete design error:", error);
+    return NextResponse.json({ error: "Failed to delete design" }, { status: 500 });
+  }
+}
+
 // POST /api/designs/[id]/generate — Trigger AI pipeline
 export async function POST(
   _req: NextRequest,

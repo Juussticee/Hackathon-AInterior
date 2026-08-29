@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import { useApp } from "@/components/app-provider";
 import { formatPrice } from "@/lib/utils";
 import Link from "next/link";
-import { Plus, Clock, CheckCircle, AlertCircle, Loader2, Sparkles } from "lucide-react";
+import { Plus, Clock, CheckCircle, AlertCircle, Loader2, Sparkles, Trash2 } from "lucide-react";
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
@@ -14,6 +14,7 @@ export default function DashboardPage() {
   const { t, currency } = useApp();
   const [designs, setDesigns] = useState<Record<string, unknown>[] | null>(null);
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -50,6 +51,27 @@ export default function DashboardPage() {
         return <Clock className="w-4 h-4 text-brand-400" />;
     }
   };
+
+  async function handleDelete(id: string, e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (deletingId) return;
+    if (!confirm("Delete this design? This cannot be undone.")) return;
+
+    setDeletingId(id);
+    try {
+      const res = await fetch(`/api/designs/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setDesigns((prev) => prev?.filter((d) => String(d.id) !== id) || []);
+      } else {
+        alert("Failed to delete design.");
+      }
+    } catch {
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:py-12">
@@ -109,11 +131,25 @@ export default function DashboardPage() {
                     <span className="text-xs text-brand-400">No visualization</span>
                   </div>
                 )}
-                <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1">
-                  {statusIcon(String(d.status ?? ""))}
-                  <span className="text-xs text-brand-600 capitalize">
-                    {String(d.status ?? "")}
-                  </span>
+                <div className="absolute top-3 right-3 flex items-center gap-1.5">
+                  <button
+                    onClick={(e) => handleDelete(String(d.id), e)}
+                    disabled={deletingId === String(d.id)}
+                    className="flex items-center justify-center w-7 h-7 bg-white/90 backdrop-blur-sm rounded-full text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50"
+                    title="Delete design"
+                  >
+                    {deletingId === String(d.id) ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Trash2 className="w-3.5 h-3.5" />
+                    )}
+                  </button>
+                  <div className="flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1">
+                    {statusIcon(String(d.status ?? ""))}
+                    <span className="text-xs text-brand-600 capitalize">
+                      {String(d.status ?? "")}
+                    </span>
+                  </div>
                 </div>
               </div>
               <div className="p-4">

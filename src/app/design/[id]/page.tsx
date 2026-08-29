@@ -15,6 +15,7 @@ import {
   Info,
   Building2,
   Maximize2,
+  Trash2,
 } from "lucide-react";
 
 interface DesignProduct {
@@ -63,6 +64,7 @@ export default function DesignResultPage() {
   const [vizExpanded, setVizExpanded] = useState(false);
   const [vizError, setVizError] = useState(false);
   const [vizLoaded, setVizLoaded] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -112,6 +114,24 @@ export default function DesignResultPage() {
   const totalCost = design.total_cost_aed || 0;
   const savings =
     design.budget_aed > totalCost ? design.budget_aed - totalCost : 0;
+
+  async function handleDeleteDesign() {
+    if (deleting) return;
+    if (!confirm("Delete this design permanently? This cannot be undone.")) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/designs/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        router.push("/dashboard");
+      } else {
+        alert("Failed to delete design.");
+        setDeleting(false);
+      }
+    } catch {
+      alert("Something went wrong. Please try again.");
+      setDeleting(false);
+    }
+  }
 
   // Group products by category
   const byCategory: Record<string, DesignProduct[]> = {};
@@ -177,6 +197,18 @@ export default function DesignResultPage() {
             </h1>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              onClick={handleDeleteDesign}
+              disabled={deleting}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm border border-red-200 text-red-500 hover:bg-red-50 hover:border-red-300 transition-colors disabled:opacity-50"
+            >
+              {deleting ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Trash2 className="w-3.5 h-3.5" />
+              )}
+              Delete
+            </button>
             <button
               onClick={() => router.push("/design/new")}
               className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm border border-brand-200 text-brand-600 hover:bg-brand-50 transition-colors"
