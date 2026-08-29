@@ -36,16 +36,25 @@ export async function GET(
   }
   if (typeof design.selected_products === "string") {
     const selected = JSON.parse(design.selected_products);
-    // Enrich with full product data
+    // Batch-fetch all products with WHERE IN to avoid N+1
+    const productIds = selected.map((sp: { productId: string }) => sp.productId).filter(Boolean);
+    const productMap = new Map<string, Record<string, unknown>>();
+    if (productIds.length > 0) {
+      const placeholders = productIds.map(() => "?").join(",");
+      const rows = db
+        .prepare(
+          `SELECT p.*, c.name as company_name FROM products p
+           JOIN companies c ON p.company_id = c.id
+           WHERE p.id IN (${placeholders})`
+        )
+        .all(...productIds) as Record<string, unknown>[];
+      for (const row of rows) {
+        productMap.set(row.id as string, row);
+      }
+    }
     design.selected_products = selected
       .map((sp: { productId: string; reason: string; category: string }) => {
-        const product = db
-          .prepare(
-            `SELECT p.*, c.name as company_name FROM products p
-             JOIN companies c ON p.company_id = c.id
-             WHERE p.id = ?`
-          )
-          .get(sp.productId);
+        const product = productMap.get(sp.productId);
         return product ? { ...sp, product } : null;
       })
       .filter(Boolean);

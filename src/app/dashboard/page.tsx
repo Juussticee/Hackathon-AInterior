@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useApp } from "@/components/app-provider";
+import { useToast } from "@/components/toast";
 import { formatPrice } from "@/lib/utils";
 import Link from "next/link";
 import { Plus, Clock, CheckCircle, AlertCircle, Loader2, Sparkles, Trash2 } from "lucide-react";
@@ -12,9 +13,11 @@ export default function DashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const { t, currency } = useApp();
+  const { toast, confirm } = useToast();
   const [designs, setDesigns] = useState<Record<string, unknown>[] | null>(null);
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -27,7 +30,7 @@ export default function DashboardPage() {
       fetch("/api/designs")
         .then((r) => r.json())
         .then((data) => setDesigns(data.designs || []))
-        .catch(() => setDesigns([]));
+        .catch(() => { setDesigns([]); setLoadError(true); });
     }
   }, [status]);
 
@@ -56,18 +59,20 @@ export default function DashboardPage() {
     e.preventDefault();
     e.stopPropagation();
     if (deletingId) return;
-    if (!confirm("Delete this design? This cannot be undone.")) return;
+    const ok = await confirm("Delete this design? This cannot be undone.");
+    if (!ok) return;
 
     setDeletingId(id);
     try {
       const res = await fetch(`/api/designs/${id}`, { method: "DELETE" });
       if (res.ok) {
         setDesigns((prev) => prev?.filter((d) => String(d.id) !== id) || []);
+        toast("Design deleted", "success");
       } else {
-        alert("Failed to delete design.");
+        toast("Failed to delete design", "error");
       }
     } catch {
-      alert("Something went wrong. Please try again.");
+      toast("Something went wrong. Please try again.", "error");
     } finally {
       setDeletingId(null);
     }
@@ -93,7 +98,13 @@ export default function DashboardPage() {
         </Link>
       </div>
 
-      {designs.length === 0 ? (
+      {loadError && (
+        <div className="mb-6 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+          Failed to load your designs. Please refresh the page.
+        </div>
+      )}
+
+      {designs.length === 0 && !loadError ? (
         <div className="text-center py-20">
           <div className="w-16 h-16 bg-brand-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <Plus className="w-8 h-8 text-brand-400" />
@@ -119,7 +130,7 @@ export default function DashboardPage() {
                 {d.visualization_url && !failedImages.has(String(d.id)) ? (
                   <img
                     src={String(d.visualization_url)}
-                    alt="Design"
+                    alt={`${String(d.room_type ?? "").replace("_", " ")} design`}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     onError={() => {
                       setFailedImages((prev) => new Set(prev).add(String(d.id)));
@@ -135,7 +146,7 @@ export default function DashboardPage() {
                   <button
                     onClick={(e) => handleDelete(String(d.id), e)}
                     disabled={deletingId === String(d.id)}
-                    className="flex items-center justify-center w-7 h-7 bg-white/90 backdrop-blur-sm rounded-full text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50"
+                    className="flex items-center justify-center w-7 h-7 bg-white/90 backdrop-blur-sm rounded-full text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100 disabled:opacity-50"
                     title="Delete design"
                   >
                     {deletingId === String(d.id) ? (

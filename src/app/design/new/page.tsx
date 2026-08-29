@@ -86,9 +86,7 @@ export default function NewDesignPage() {
   }, [loading]);
 
   // Handle image selection — upload immediately
-  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  async function processImageFile(file: File) {
     if (file.size > 10 * 1024 * 1024) {
       setError("Image must be under 10MB");
       return;
@@ -111,7 +109,7 @@ export default function NewDesignPage() {
         const { url } = await res.json();
         setRoomImageUrl(url);
       } else {
-        // Fall back to base64 if upload fails (e.g. file-system not writable on some hosts)
+        // Fall back to base64 if upload fails
         const reader = new FileReader();
         reader.onload = (ev) => setRoomImageUrl(ev.target?.result as string);
         reader.readAsDataURL(file);
@@ -125,6 +123,14 @@ export default function NewDesignPage() {
       setRoomImageUploading(false);
     }
   }
+
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    processImageFile(file);
+  }
+
+  const [dragOver, setDragOver] = useState(false);
 
   function clearImage() {
     setRoomImageFile(null);
@@ -312,9 +318,26 @@ export default function NewDesignPage() {
                     onClick={() =>
                       !roomImagePreview && fileRef.current?.click()
                     }
+                    onDragOver={(e) => {
+                      if (roomImagePreview) return;
+                      e.preventDefault();
+                      setDragOver(true);
+                    }}
+                    onDragLeave={() => setDragOver(false)}
+                    onDrop={(e) => {
+                      if (roomImagePreview) return;
+                      e.preventDefault();
+                      setDragOver(false);
+                      const file = e.dataTransfer.files?.[0];
+                      if (file && file.type.startsWith("image/")) {
+                        processImageFile(file);
+                      }
+                    }}
                     className={`relative border-2 border-dashed rounded-xl transition-colors overflow-hidden ${
                       roomImagePreview
                         ? "border-brand-300 cursor-default"
+                        : dragOver
+                        ? "border-brand-500 bg-brand-50 cursor-pointer p-8 text-center"
                         : "border-brand-200 hover:border-brand-400 cursor-pointer p-8 text-center"
                     }`}
                   >

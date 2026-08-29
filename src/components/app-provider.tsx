@@ -5,10 +5,12 @@ import {
   useContext,
   useState,
   useCallback,
+  useEffect,
   type ReactNode,
 } from "react";
 import type { Currency, Language } from "@/lib/types";
 import { t as translate } from "@/lib/i18n";
+import { ToastProvider } from "./toast";
 
 interface AppContextValue {
   language: Language;
@@ -22,9 +24,36 @@ interface AppContextValue {
 
 const AppContext = createContext<AppContextValue | null>(null);
 
+const LANG_KEY = "ainterior_language";
+const CURR_KEY = "ainterior_currency";
+
+function readStorage<T>(key: string, fallback: T): T {
+  if (typeof window === "undefined") return fallback;
+  try {
+    const val = localStorage.getItem(key);
+    return val ? (val as T) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguage] = useState<Language>("en");
-  const [currency, setCurrency] = useState<Currency>("AED");
+  const [language, setLanguageState] = useState<Language>(() =>
+    readStorage<Language>(LANG_KEY, "en")
+  );
+  const [currency, setCurrencyState] = useState<Currency>(() =>
+    readStorage<Currency>(CURR_KEY, "AED")
+  );
+
+  const setLanguage = useCallback((lang: Language) => {
+    setLanguageState(lang);
+    try { localStorage.setItem(LANG_KEY, lang); } catch { /* ignore */ }
+  }, []);
+
+  const setCurrency = useCallback((cur: Currency) => {
+    setCurrencyState(cur);
+    try { localStorage.setItem(CURR_KEY, cur); } catch { /* ignore */ }
+  }, []);
 
   const t = useCallback(
     (key: string) => translate(key, language),
@@ -34,11 +63,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const dir = language === "ar" ? "rtl" : "ltr";
   const isRTL = language === "ar";
 
+  // Sync dir attribute on <html> for RTL support
+  useEffect(() => {
+    document.documentElement.setAttribute("dir", dir);
+    document.documentElement.setAttribute("lang", language);
+  }, [dir, language]);
+
   return (
     <AppContext.Provider
       value={{ language, setLanguage, currency, setCurrency, t, dir, isRTL }}
     >
-      {children}
+      <ToastProvider>
+        {children}
+      </ToastProvider>
     </AppContext.Provider>
   );
 }

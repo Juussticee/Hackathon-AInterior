@@ -41,7 +41,14 @@ export async function POST(req: NextRequest) {
       await mkdir(uploadsDir, { recursive: true });
     }
 
-    const ext = file.name.split(".").pop() || "jpg";
+    const ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png", "webp", "gif"];
+    const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+    if (!ALLOWED_EXTENSIONS.includes(ext)) {
+      return NextResponse.json(
+        { error: "Invalid file extension" },
+        { status: 400 }
+      );
+    }
     const filename = `${generateId()}.${ext}`;
     const filepath = path.join(uploadsDir, filename);
 

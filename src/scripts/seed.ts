@@ -64,34 +64,52 @@ function inferPriceTier(price: number): "economy" | "moderate" | "premium" {
  * whose Cloudflare protection blocks direct image scraping).
  * Uses a stable seed so the same product always gets the same image.
  */
-function generateImageUrl(productName: string, subcategory: string): string {
-  const prompts: Record<string, string> = {
-    beds: "minimalist wooden bed frame with white linen bedding in bright clean bedroom",
-    nightstands: "minimalist wooden nightstand bedside table with small lamp in clean bedroom",
-    sofas: "modern minimalist fabric sofa with neutral cushions in bright clean living room",
-    chairs: "minimalist upholstered accent chair in neutral tones in bright clean room",
-    "coffee-tables": "minimalist wooden coffee table in bright clean modern living room",
-    "tv-units": "minimalist low profile wooden TV console unit in clean modern living room",
-    "dining-tables": "minimalist wooden dining table with chairs in bright clean dining room",
-    desks: "minimalist wooden writing desk with chair in bright clean home office",
-    shelving: "minimalist wooden open bookshelf with decor items in clean modern room",
-    "floor-lamps": "minimalist modern floor lamp with fabric shade in bright clean room",
-    "table-lamps": "minimalist ceramic table lamp with linen shade on wooden surface",
-    "pendant-lights": "minimalist modern pendant light fixture in bright clean room",
-    rugs: "neutral colored flatweave area rug on wooden floor in minimalist room",
-    storage: "minimalist wooden storage chest of drawers in bright clean bedroom",
-    dressers: "minimalist wooden dresser with mirror in bright clean bedroom",
-    mirrors: "large minimalist floor mirror leaning against white wall in bright room",
-    lighting: "minimalist modern light fixture in bright clean room",
+function generateImageUrl(product: RawProduct): string {
+  const sub = product.subcategory.toLowerCase().replace(/\s+/g, "-");
+
+  // Build a per-product prompt using actual colors and materials
+  const colors = (product.colors || []).slice(0, 2).map((c) => c.toLowerCase());
+  const materials = (product.materials || "")
+    .split(",")
+    .map((m) => m.trim().toLowerCase())
+    .filter(Boolean)
+    .slice(0, 2);
+
+  const basePrompts: Record<string, string> = {
+    beds: "bed frame with clean bedding",
+    nightstands: "nightstand bedside table with small lamp",
+    sofas: "fabric sofa with cushions",
+    chairs: "upholstered accent chair",
+    "coffee-tables": "coffee table",
+    "tv-units": "low profile TV console unit",
+    "dining-tables": "dining table with chairs",
+    desks: "writing desk with chair",
+    shelving: "open bookshelf with decor",
+    "floor-lamps": "modern floor lamp with fabric shade",
+    "table-lamps": "ceramic table lamp with linen shade",
+    "pendant-lights": "modern pendant light fixture",
+    rugs: "flatweave area rug on wooden floor",
+    storage: "storage chest of drawers",
+    dressers: "dresser with mirror",
+    mirrors: "large floor mirror leaning against wall",
+    lighting: "modern light fixture",
   };
 
-  const sub = subcategory.toLowerCase().replace(/\s+/g, "-");
-  const prompt = prompts[sub] || "minimalist furniture piece in bright clean modern room";
+  const base = basePrompts[sub] || "furniture piece";
+
+  // Compose prompt: "blue velvet sofa" / "oak wood dining table"
+  const parts: string[] = [];
+  if (colors.length) parts.push(colors.join(" and "));
+  if (materials.length) parts.push(materials.join(" and "));
+  parts.push(base);
+
+  const prompt = `minimalist ${parts.join(" ")} in bright clean modern room, professional product photography`;
 
   // Stable seed from product name (same product = same image)
+  const name = product.product_name;
   let hash = 0;
-  for (let i = 0; i < productName.length; i++) {
-    hash = ((hash << 5) - hash + productName.charCodeAt(i)) | 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = ((hash << 5) - hash + name.charCodeAt(i)) | 0;
   }
   const seed = Math.abs(hash);
   return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=400&height=400&seed=${seed}&nologo=true`;
@@ -205,7 +223,7 @@ function main() {
       // Use real image URL if available, otherwise generate Pollinations URL
       let imageUrl = p.main_image_url;
       if (!imageUrl) {
-        imageUrl = generateImageUrl(p.product_name, subcategory);
+        imageUrl = generateImageUrl(p);
         imagesGenerated++;
       }
 

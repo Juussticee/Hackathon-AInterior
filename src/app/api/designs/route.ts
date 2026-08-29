@@ -4,21 +4,34 @@ import { authOptions } from "@/lib/auth";
 import db from "@/lib/db";
 import { generateId } from "@/lib/utils";
 
-// GET /api/designs — List user's designs
-export async function GET() {
+const VALID_ROOM_TYPES = ["bedroom", "living_room", "dining_room", "office", "bathroom", "kitchen"];
+
+// GET /api/designs — List user's designs (paginated)
+export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const { searchParams } = new URL(req.url);
+  const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
+  const limit = Math.min(50, Math.max(1, parseInt(searchParams.get("limit") || "12", 10)));
+  const offset = (page - 1) * limit;
+
   const userId = (session.user as { id: string }).id;
+  const total = (
+    db
+      .prepare("SELECT COUNT(*) as cnt FROM design_projects WHERE user_id = ?")
+      .get(userId) as { cnt: number }
+  ).cnt;
+
   const designs = db
     .prepare(
-      "SELECT * FROM design_projects WHERE user_id = ? ORDER BY created_at DESC"
+      "SELECT * FROM design_projects WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?"
     )
-    .all(userId);
+    .all(userId, limit, offset);
 
-  return NextResponse.json({ designs });
+  return NextResponse.json({ designs, total, page, limit, pages: Math.ceil(total / limit) });
 }
 
 // POST /api/designs — Create new design project
@@ -46,6 +59,35 @@ export async function POST(req: NextRequest) {
     if (!roomType || !roomLengthCm || !roomWidthCm || !styleSlug || !budgetAed) {
       return NextResponse.json(
         { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    // Input validation
+    if (!VALID_ROOM_TYPES.includes(roomType)) {
+      return NextResponse.json(
+        { error: `Invalid room type. Must be one of: ${VALID_ROOM_TYPES.join(", ")}` },
+        { status: 400 }
+      );
+    }
+    const lengthNum = Number(roomLengthCm);
+    const widthNum = Number(roomWidthCm);
+    const budgetNum = Number(budgetAed);
+    if (!lengthNum || lengthNum < 100 || lengthNum > 2000 || !widthNum || widthNum < 100 || widthNum > 2000) {
+      return NextResponse.json(
+        { error: "Room dimensions must be between 100cm and 2000cm" },
+        { status: 400 }
+      );
+    }
+    if (!budgetNum || budgetNum < 500 || budgetNum > 500000) {
+      return NextResponse.json(
+        { error: "Budget must be between AED 500 and AED 500,000" },
+        { status: 400 }
+      );
+    }
+    if (typeof styleSlug !== "string" || styleSlug.length > 50) {
+      return NextResponse.json(
+        { error: "Invalid style" },
         { status: 400 }
       );
     }

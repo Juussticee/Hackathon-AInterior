@@ -39,6 +39,8 @@ export default function AdminPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [formError, setFormError] = useState("");
 
   // Add company form
   const [showCompanyForm, setShowCompanyForm] = useState(false);
@@ -61,7 +63,13 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/login");
-  }, [status, router]);
+    if (status === "authenticated") {
+      const role = (session?.user as { role?: string } | undefined)?.role;
+      if (role !== "admin") {
+        router.push("/dashboard");
+      }
+    }
+  }, [status, session, router]);
 
   useEffect(() => {
     if (status === "authenticated") {
@@ -83,54 +91,78 @@ export default function AdminPage() {
         const d = await prodRes.json();
         setProducts(d.products || []);
       }
-    } catch {
-      // Admin might not have access
+    } catch (err) {
+      setLoadError("Failed to load admin data. Check your connection and try again.");
     } finally {
       setLoading(false);
     }
   }
 
   async function addCompany() {
-    const res = await fetch("/api/admin/companies", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: newCompanyName,
-        slug: newCompanySlug || newCompanyName.toLowerCase().replace(/\s+/g, "-"),
-        website: newCompanyWebsite,
-      }),
-    });
-    if (res.ok) {
-      setNewCompanyName("");
-      setNewCompanySlug("");
-      setNewCompanyWebsite("");
-      setShowCompanyForm(false);
-      loadData();
+    if (!newCompanyName.trim()) {
+      setFormError("Company name is required");
+      return;
+    }
+    setFormError("");
+    try {
+      const res = await fetch("/api/admin/companies", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newCompanyName,
+          slug: newCompanySlug || newCompanyName.toLowerCase().replace(/\s+/g, "-"),
+          website: newCompanyWebsite,
+        }),
+      });
+      if (res.ok) {
+        setNewCompanyName("");
+        setNewCompanySlug("");
+        setNewCompanyWebsite("");
+        setShowCompanyForm(false);
+        loadData();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setFormError(data.error || "Failed to create company");
+      }
+    } catch {
+      setFormError("Network error. Please try again.");
     }
   }
 
   async function addProduct() {
-    const res = await fetch("/api/admin/products", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...newProduct,
-        priceAed: Number(newProduct.priceAed),
-      }),
-    });
-    if (res.ok) {
-      setNewProduct({
-        name: "",
-        companyId: "",
-        subcategory: "",
-        priceAed: "",
-        productUrl: "",
-        mainImageUrl: "",
-        materials: "",
-        description: "",
+    if (!newProduct.name.trim() || !newProduct.companyId || !newProduct.priceAed) {
+      setFormError("Name, company, and price are required");
+      return;
+    }
+    setFormError("");
+    try {
+      const res = await fetch("/api/admin/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...newProduct,
+          priceAed: Number(newProduct.priceAed),
+        }),
       });
-      setShowProductForm(false);
-      loadData();
+      if (res.ok) {
+        setNewProduct({
+          name: "",
+          companyId: "",
+          subcategory: "",
+          priceAed: "",
+          productUrl: "",
+          mainImageUrl: "",
+          materials: "",
+          description: "",
+        });
+        setShowProductForm(false);
+        loadData();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setFormError(data.error || "Failed to create product");
+      }
+    } catch {
+      setFormError("Network error. Please try again.");
     }
   }
 
@@ -147,6 +179,17 @@ export default function AdminPage() {
       <h1 className="text-2xl font-bold text-brand-900 mb-6">
         {t("admin.title")}
       </h1>
+
+      {loadError && (
+        <div className="mb-6 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+          {loadError}
+        </div>
+      )}
+      {formError && (
+        <div className="mb-6 px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-700">
+          {formError}
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex gap-4 mb-8 border-b border-brand-100">

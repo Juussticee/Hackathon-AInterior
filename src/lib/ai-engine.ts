@@ -403,8 +403,10 @@ export async function generateVisualization(
     })
     .join(", ");
 
+  const roomDesc = spaceAnalysis.roomType.replace("_", " ");
   const prompt = [
-    `Professional interior design photograph of a ${spaceAnalysis.roomType.replace("_", " ")}`,
+    `Professional interior design photograph of a ${roomDesc}`,
+    `wide-angle shot from the room entrance looking inward`,
     `${style.name} style interior`,
     `${spaceAnalysis.estimatedAreaSqm.toFixed(0)} square meter room`,
     `furniture: ${furnitureDescriptions}`,
@@ -414,11 +416,12 @@ export async function generateVisualization(
       : null,
     style.lightingPreference
       ? style.lightingPreference
-      : "soft natural lighting",
+      : "warm afternoon natural lighting from windows",
     "photorealistic, magazine quality, professional staging, 8k resolution, architectural photography",
+    "warm inviting mood, lived-in feel",
   ]
     .filter(Boolean)
-    .join(", ");
+    .join(", ") + ", no people, no text, no watermarks, no logos, no clutter";
 
   console.log("[viz] Prompt:", prompt.slice(0, 200));
 
@@ -558,12 +561,21 @@ export async function runDesignPipeline(params: {
     params.additionalRequirements
   );
 
-  // Enrich with full product data from DB
+  // Enrich with full product data from DB — batched WHERE IN to avoid N+1
+  const productIds = selectedProducts.map((sp) => sp.productId);
+  const productMap = new Map<string, Product>();
+  if (productIds.length > 0) {
+    const placeholders = productIds.map(() => "?").join(",");
+    const rows = db
+      .prepare(`SELECT * FROM products WHERE id IN (${placeholders})`)
+      .all(...productIds) as Product[];
+    for (const row of rows) {
+      productMap.set(row.id, row);
+    }
+  }
   const enriched = selectedProducts
     .map((sp) => {
-      const product = db
-        .prepare("SELECT * FROM products WHERE id = ?")
-        .get(sp.productId) as Product | undefined;
+      const product = productMap.get(sp.productId);
       return product ? { ...sp, product } : null;
     })
     .filter(Boolean) as (SelectedProduct & { product: Product })[];

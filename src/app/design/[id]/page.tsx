@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useApp } from "@/components/app-provider";
+import { useToast } from "@/components/toast";
 import { formatPrice } from "@/lib/utils";
 import {
   ExternalLink,
@@ -29,12 +30,13 @@ interface DesignProduct {
     company_name: string;
     price_aed: number;
     original_price_aed: number | null;
-    main_image_url: string;
+    main_image_url: string | null;
     product_url: string;
     subcategory: string;
     materials: string | null;
     colors: string;
     description: string | null;
+    data_source: string;
   };
 }
 
@@ -57,6 +59,7 @@ export default function DesignResultPage() {
   const params = useParams();
   const router = useRouter();
   const { t, currency } = useApp();
+  const { toast, confirm } = useToast();
   const id = params.id as string;
 
   const [design, setDesign] = useState<Design | null>(null);
@@ -118,18 +121,19 @@ export default function DesignResultPage() {
 
   async function handleDeleteDesign() {
     if (deleting) return;
-    if (!confirm("Delete this design permanently? This cannot be undone.")) return;
+    const ok = await confirm("Delete this design permanently? This cannot be undone.");
+    if (!ok) return;
     setDeleting(true);
     try {
       const res = await fetch(`/api/designs/${id}`, { method: "DELETE" });
       if (res.ok) {
         router.push("/dashboard");
       } else {
-        alert("Failed to delete design.");
+        toast("Failed to delete design", "error");
         setDeleting(false);
       }
     } catch {
-      alert("Something went wrong. Please try again.");
+      toast("Something went wrong. Please try again.", "error");
       setDeleting(false);
     }
   }
@@ -320,7 +324,7 @@ export default function DesignResultPage() {
                     design.style_slug.charAt(0).toUpperCase() +
                     design.style_slug.slice(1),
                 },
-                { label: "Retailers", value: "3 UAE stores" },
+                { label: "Retailers", value: `${new Set(products.map((sp) => sp.product.company_name)).size} UAE stores` },
               ].map(({ label, value }) => (
                 <div key={label} className="flex justify-between text-sm">
                   <span className="text-brand-500">{label}</span>
@@ -397,18 +401,30 @@ export default function DesignResultPage() {
                 >
                   {/* Image */}
                   <div className="relative aspect-square bg-brand-50 overflow-hidden">
-                    <img
-                      src={p.main_image_url}
-                      alt={p.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src =
-                          "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&q=80";
-                      }}
-                    />
+                    {p.main_image_url ? (
+                      <img
+                        src={p.main_image_url}
+                        alt={p.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src =
+                            "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&q=80";
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center gap-2">
+                        <ShoppingBag className="w-8 h-8 text-brand-300" />
+                        <span className="text-[10px] text-brand-400">Image unavailable</span>
+                      </div>
+                    )}
                     {isOnSale && (
                       <span className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
                         SALE
+                      </span>
+                    )}
+                    {p.data_source === "search_index" && (
+                      <span className="absolute top-2 right-2 bg-amber-400/90 text-white text-[10px] font-medium px-1.5 py-0.5 rounded-full backdrop-blur-sm">
+                        AI Image
                       </span>
                     )}
                     <span className="absolute bottom-2 right-2 bg-white/90 backdrop-blur-sm text-brand-600 text-[10px] font-medium px-2 py-0.5 rounded-full border border-brand-100 capitalize">
