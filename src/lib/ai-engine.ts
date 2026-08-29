@@ -190,6 +190,81 @@ type RawProduct = Product & {
   company_name: string;
 };
 
+// ---- Category normalization ----
+// Maps root furniture concepts to all known DB subcategory variants
+const CATEGORY_SYNONYMS: Record<string, string[]> = {
+  bed: ["beds", "bed", "bed-frame", "bed_frame"],
+  nightstand: ["nightstands", "nightstand", "bedside-table", "bedside_table"],
+  dresser: ["dressers", "dresser"],
+  chair: ["chairs", "chair", "accent-chair", "accent_chair", "armchair", "dining-chair", "dining_chair"],
+  sofa: ["sofas", "sofa", "couch"],
+  table: ["tables", "table", "dining-tables", "dining_tables", "coffee-tables", "coffee_tables", "side-tables", "side_tables", "console-tables", "console_tables"],
+  desk: ["desks", "desk", "writing-desk", "writing_desk"],
+  rug: ["rugs", "rug"],
+  lamp: ["floor-lamps", "floor_lamps", "table-lamps", "table_lamps", "pendant-lights", "pendant_lights", "lamp", "lamps", "lighting"],
+  storage: ["storage", "bookcases", "bookcase", "shelving", "wardrobe", "cabinet"],
+  mirror: ["mirrors", "mirror"],
+  tv_unit: ["tv-units", "tv_units", "tv-unit", "media-unit", "media_unit"],
+  decor: ["decor", "vases", "vase", "cushions", "art", "wall-art"],
+  sideboard: ["sideboard", "sideboards", "buffet", "credenza"],
+};
+
+/**
+ * Expand a list of category names (e.g. ["bed", "chair"]) into all known
+ * DB subcategory variants (e.g. ["beds", "bed", "chairs", "chair", ...]).
+ * Handles singular/plural/hyphen/underscore mismatches between style
+ * definitions and the actual database subcategory column.
+ */
+function expandCategories(categories: string[]): Set<string> {
+  const result = new Set<string>();
+  for (const cat of categories) {
+    const lower = cat.toLowerCase().trim();
+    if (!lower) continue;
+    // Direct add
+    result.add(lower);
+    // Find matching synonym group by checking if any key/synonym matches
+    for (const [, synonyms] of Object.entries(CATEGORY_SYNONYMS)) {
+      if (synonyms.some((s) => s === lower || s.replace(/[-_s]$/g, "") === lower.replace(/[-_s]$/g, ""))) {
+        synonyms.forEach((s) => result.add(s));
+      }
+    }
+  }
+  return result;
+}
+
+/**
+ * Parse user's free-text requirements to extract furniture category keywords.
+ * E.g. "I need a chair, a table, and a bed" → ["chair", "table", "bed"]
+ */
+function parseUserCategories(text: string): string[] {
+  const lower = text.toLowerCase();
+  const found: string[] = [];
+  const furnitureKeywords: Record<string, string[]> = {
+    bed: ["bed", "beds", "bed frame", "bedframe"],
+    chair: ["chair", "chairs", "armchair", "accent chair", "dining chair"],
+    table: ["table", "tables", "dining table", "coffee table", "side table", "desk"],
+    sofa: ["sofa", "sofas", "couch"],
+    desk: ["desk", "desks", "writing desk", "work desk"],
+    rug: ["rug", "rugs", "carpet"],
+    lamp: ["lamp", "lamps", "light", "lights", "floor lamp", "table lamp", "lighting", "pendant"],
+    storage: ["storage", "shelf", "shelves", "bookshelf", "bookcase", "cabinet", "wardrobe"],
+    mirror: ["mirror", "mirrors"],
+    dresser: ["dresser", "dressers", "chest of drawers"],
+    nightstand: ["nightstand", "nightstands", "bedside table"],
+    tv_unit: ["tv unit", "tv stand", "media unit", "tv console"],
+    sideboard: ["sideboard", "buffet", "credenza"],
+  };
+  for (const [category, keywords] of Object.entries(furnitureKeywords)) {
+    for (const kw of keywords) {
+      if (lower.includes(kw)) {
+        found.push(category);
+        break;
+      }
+    }
+  }
+  return found;
+}
+
 function filterProducts(
   styleSlug: string,
   roomType: string,
@@ -207,6 +282,10 @@ function filterProducts(
     )
     .all(maxItemPrice) as RawProduct[];
 
+  // Normalize required categories into all known DB subcategory variants
+  const expandedCats = expandCategories(requiredCategories);
+  const hasCatFilter = expandedCats.size > 0;
+
   return rows.filter((p) => {
     // style_tags is a JSON string in the DB
     let styleTags: string[] = [];
@@ -220,7 +299,11 @@ function filterProducts(
     try { roomTypes = JSON.parse(p.room_types || "[]"); } catch { roomTypes = []; }
     const matchesRoom = roomTypes.length === 0 || roomTypes.includes(roomType);
 
-    return matchesStyle && matchesRoom;
+    // Category filter — match product subcategory against expanded required categories
+    const sub = (p.subcategory || "").toLowerCase().replace(/\s+/g, "-");
+    const matchesCategory = !hasCatFilter || expandedCats.has(sub);
+
+    return matchesStyle && matchesRoom && matchesCategory;
   });
 }
 
@@ -236,14 +319,22 @@ export async function selectProducts(
   const style = getStyleBySlug(styleSlug);
   if (!style) throw new Error(`Unknown style: ${styleSlug}`);
 
-  const requiredCategories =
+  const styleCategories =
     style.categoryRequirements[spaceAnalysis.roomType] || [];
+
+  // Parse user's free-text requirements into furniture categories
+  const userCategories = additionalRequirements
+    ? parseUserCategories(additionalRequirements)
+    : [];
+
+  // Merge style + user categories (deduplicated)
+  const allCategories = [...new Set([...styleCategories, ...userCategories])];
 
   const candidates = filterProducts(
     styleSlug,
     spaceAnalysis.roomType,
     budgetAed,
-    requiredCategories
+    allCategories
   );
 
   if (candidates.length === 0) {
@@ -267,6 +358,10 @@ export async function selectProducts(
     };
   });
 
+  const userCatLine = userCategories.length > 0
+    ? `\nMANDATORY USER-REQUESTED ITEMS (you MUST include at least one product for each): ${userCategories.join(", ")}`
+    : "";
+
   const prompt = `You are an expert interior designer AI. Select furniture for a room.
 
 ROOM:
@@ -281,13 +376,18 @@ Materials: ${style.materials.join(", ")}
 Colors: ${style.colorPalette.primary.join(", ")}, ${style.colorPalette.accent.join(", ")}
 
 BUDGET: AED ${budgetAed} total (stay within this)
-REQUIRED CATEGORIES: ${requiredCategories.join(", ")}
+STYLE CATEGORIES: ${styleCategories.join(", ")}${userCatLine}
 ${additionalRequirements ? `USER REQUIREMENTS: ${additionalRequirements}` : ""}
 
 AVAILABLE PRODUCTS (${productSummary.length} items):
 ${JSON.stringify(productSummary, null, 2)}
 
-Select 6-10 products. Cover all required categories. Stay within AED ${budgetAed} total. Ensure color/material harmony.
+RULES:
+1. Select 6-10 products total.
+2. You MUST cover every user-requested item — if the user asks for a "chair", "table", and "bed", your selection MUST include at least one chair, one table, and one bed.
+3. Then fill remaining slots from the style categories.
+4. Stay within AED ${budgetAed} total.
+5. Ensure color/material harmony.
 
 Return ONLY valid JSON (no markdown):
 {
@@ -323,6 +423,31 @@ Return ONLY valid JSON (no markdown):
     }
 
     if (selected.length === 0) throw new Error("AI selected no valid products");
+
+    // Post-validation: check user-requested categories are covered
+    if (userCategories.length > 0) {
+      const selectedSubs = new Set(
+        selected.map((s) => {
+          const prod = candidates.find((c) => c.id === s.productId);
+          return (prod?.subcategory || "").toLowerCase().replace(/\s+/g, "-");
+        })
+      );
+      const selectedCats = selected.map((s) => (s.category || "").toLowerCase());
+
+      for (const userCat of userCategories) {
+        const expanded = expandCategories([userCat]);
+        const covered =
+          [...expanded].some((e) => selectedSubs.has(e)) ||
+          selectedCats.some((c) => c.includes(userCat));
+        if (!covered) {
+          console.warn(
+            `[selectProducts] User-requested "${userCat}" not covered by AI selection. ` +
+            `Selected subcategories: ${[...selectedSubs].join(", ")}`
+          );
+        }
+      }
+    }
+
     return selected;
   } catch (error) {
     console.error("Product selection error:", error);
