@@ -286,25 +286,43 @@ function filterProducts(
   const expandedCats = expandCategories(requiredCategories);
   const hasCatFilter = expandedCats.size > 0;
 
-  return rows.filter((p) => {
-    // style_tags is a JSON string in the DB
-    let styleTags: string[] = [];
-    try { styleTags = JSON.parse(p.style_tags || "[]"); } catch { styleTags = []; }
-    const matchesStyle =
-      styleTags.length === 0 ||
-      styleTags.some((tag: string) => tag.toLowerCase() === styleSlug.toLowerCase());
-
-    // room_types is a JSON string in the DB
+  // Helper: check if a product matches room + category filters
+  const matchRoomCat = (p: RawProduct): boolean => {
     let roomTypes: string[] = [];
     try { roomTypes = JSON.parse(p.room_types || "[]"); } catch { roomTypes = []; }
     const matchesRoom = roomTypes.length === 0 || roomTypes.includes(roomType);
-
-    // Category filter — match product subcategory against expanded required categories
     const sub = (p.subcategory || "").toLowerCase().replace(/\s+/g, "-");
     const matchesCategory = !hasCatFilter || expandedCats.has(sub);
+    return matchesRoom && matchesCategory;
+  };
 
-    return matchesStyle && matchesRoom && matchesCategory;
-  });
+  // Helper: check if a product matches the style filter
+  const matchStyle = (p: RawProduct): boolean => {
+    let styleTags: string[] = [];
+    try { styleTags = JSON.parse(p.style_tags || "[]"); } catch { styleTags = []; }
+    return (
+      styleTags.length === 0 ||
+      styleTags.some((tag: string) => tag.toLowerCase() === styleSlug.toLowerCase())
+    );
+  };
+
+  // First attempt: style + room + category
+  const strict = rows.filter((p) => matchStyle(p) && matchRoomCat(p));
+
+  // Fallback: if style is too restrictive (new styles with no tagged products),
+  // relax the style filter and use room + category only
+  if (strict.length < 5) {
+    const relaxed = rows.filter(matchRoomCat);
+    if (relaxed.length > strict.length) {
+      console.warn(
+        `[filterProducts] Style "${styleSlug}" matched only ${strict.length} products, ` +
+        `falling back to room+category filter (${relaxed.length} candidates)`
+      );
+      return relaxed;
+    }
+  }
+
+  return strict;
 }
 
 // ================================================================
