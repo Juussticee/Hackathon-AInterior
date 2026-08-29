@@ -561,40 +561,102 @@ export async function generateVisualization(
     .map(([desc, count]) => (count > 1 ? `${count} ${desc}s` : desc))
     .join(", ");
 
-  // Extract style visual cues
-  const styleColors = style.colorPalette.primary.slice(0, 3)
-    .map((hex) => {
-      // Convert hex to readable name approximation
-      const names: Record<string, string> = {
-        "#FFFFFF": "white", "#F5F5F5": "light grey", "#E0E0E0": "grey",
-        "#9E9E9E": "medium grey", "#212121": "charcoal", "#424242": "dark grey",
-        "#616161": "grey", "#F5F0EB": "warm cream", "#E8DDD3": "warm beige",
-        "#D4C5B5": "sand", "#C4A882": "golden oak", "#8B7355": "warm brown",
-        "#6B5B45": "dark brown", "#4A4035": "espresso", "#2C2418": "dark chocolate",
-      };
-      return names[hex] || hex;
-    })
+  // Per-style trigger words — text-to-image models respond strongly to these
+  // rather than just a style name. These are carefully chosen to steer Flux.
+  const STYLE_TRIGGERS: Record<string, string> = {
+    minimalist: "minimalist, uncluttered, monochromatic, negative space, serene",
+    japandi: "japandi, wabi-sabi, Scandinavian hygge, organic warmth, muted earth tones, zen",
+    modern: "contemporary modern, geometric forms, polished surfaces, bold contrast",
+    industrial: "urban loft, exposed brick, raw metal, reclaimed wood, Edison bulbs, factory aesthetic",
+    bohemian: "boho eclectic, layered textiles, macramé, woven patterns, Moroccan lanterns, terracotta accents",
+    coastal: "coastal beach house, whitewashed wood, ocean blue accents, rattan furniture, linen curtains, sun-bleached palette, breezy seaside",
+  };
+  const styleTriggers = STYLE_TRIGGERS[styleSlug] || style.name;
+
+  // Comprehensive hex→name map covering all 6 styles
+  const HEX_NAMES: Record<string, string> = {
+    // Whites/grays
+    "#FFFFFF": "crisp white", "#F5F5F5": "off-white", "#E0E0E0": "light grey",
+    "#9E9E9E": "medium grey", "#616161": "grey", "#424242": "dark grey",
+    "#212121": "charcoal", "#BDBDBD": "silver grey",
+    // Japandi / warm
+    "#F5F0EB": "warm cream", "#E8DDD3": "warm beige", "#D4C5B5": "sandy beige",
+    "#C4A882": "golden tan", "#8B7355": "warm brown", "#6B5B45": "dark walnut",
+    "#4A4035": "espresso", "#2C2418": "dark chocolate",
+    // Bohemian
+    "#FFF8E1": "warm ivory", "#FFECB3": "pale gold", "#D7CCC8": "dusty rose",
+    "#A1887F": "terracotta beige", "#E65100": "burnt orange", "#BF360C": "rust red",
+    "#1B5E20": "deep forest green", "#4A148C": "deep violet",
+    // Industrial
+    "#5D4037": "raw umber", "#795548": "bronze brown", "#3E2723": "dark iron",
+    "#FF8F00": "amber",
+    // Coastal
+    "#E3F2FD": "pale sky blue", "#BBDEFB": "soft ocean blue",
+    "#0277BD": "deep ocean blue", "#01579B": "navy",
+    "#00838F": "teal", "#4DB6AC": "seafoam green",
+    // Modern
+    "#1565C0": "cobalt blue", "#0D47A1": "deep navy", "#FF6F00": "amber orange",
+  };
+
+  // Resolve all palette entries to readable names
+  const resolvePaletteColor = (hex: string): string => HEX_NAMES[hex] || hex;
+
+  const primaryColors = style.colorPalette.primary
+    .slice(0, 3)
+    .map(resolvePaletteColor)
+    .join(", ");
+  const accentColors = style.colorPalette.accent
+    .slice(0, 2)
+    .map(resolvePaletteColor)
+    .join(" and ");
+  const avoidColors = style.colorPalette.avoid
+    .slice(0, 2)
+    .map(resolvePaletteColor)
     .join(", ");
 
-  const roomDesc = spaceAnalysis.roomType.replace("_", " ");
-  const prompt = [
-    `Professional interior design photograph of a ${roomDesc}`,
-    `wide-angle shot from the room entrance looking inward`,
-    `${style.name} style interior`,
-    `${spaceAnalysis.estimatedAreaSqm.toFixed(0)} square meter room`,
-    `furniture: ${furnitureDescriptions}`,
-    `walls and textiles in ${styleColors}`,
-    style.materials.length > 0
-      ? `materials: ${style.materials.slice(0, 4).join(", ")}`
-      : null,
-    style.lightingPreference
-      ? style.lightingPreference
-      : "warm afternoon natural lighting from windows",
-    "photorealistic, magazine quality, professional staging, 8k resolution, architectural photography",
-    "warm inviting mood, lived-in feel",
+  // Materials — clean up hyphenated slugs to readable phrases
+  const materialNames = style.materials
+    .slice(0, 5)
+    .map((m) => m.replace(/-/g, " "))
+    .join(", ");
+
+  // Furniture characteristics — directly describe visual properties
+  const fc = style.furnitureCharacteristics || {};
+  const furnitureCues = [
+    fc.profile ? `${fc.profile} profile` : null,
+    fc.legs ? `${fc.legs} legs` : null,
+    fc.surfaces ? `${fc.surfaces} surfaces` : null,
+    fc.lines ? `${fc.lines} lines` : null,
+    fc.ornamentation && fc.ornamentation !== "none" ? fc.ornamentation : null,
   ]
     .filter(Boolean)
-    .join(", ") + ", no people, no text, no watermarks, no logos, no clutter";
+    .join(", ");
+
+  const roomDesc = spaceAnalysis.roomType.replace(/_/g, " ");
+  const prompt = [
+    // Style trigger — most important, placed first so diffusion model latches on first
+    styleTriggers,
+    `professional interior design photograph of a ${roomDesc}`,
+    `wide-angle shot from the room entrance looking inward`,
+    `${spaceAnalysis.estimatedAreaSqm.toFixed(0)} square meter room`,
+    // Products
+    `furniture: ${furnitureDescriptions}`,
+    // Style-specific furniture visual properties
+    furnitureCues ? `furniture style: ${furnitureCues}` : null,
+    // Color palette — explicit and comprehensive
+    `wall and textile colors: ${primaryColors}`,
+    `accent colors: ${accentColors}`,
+    // Materials
+    `materials and textures: ${materialNames}`,
+    // Lighting
+    style.lightingPreference || "warm afternoon natural lighting from windows",
+    // Photo quality
+    "photorealistic, magazine quality, professional staging, 8k resolution, architectural photography",
+    // Negative guidance
+    avoidColors ? `avoid colors: ${avoidColors}` : null,
+  ]
+    .filter(Boolean)
+    .join(", ") + ", no people, no text, no watermarks, no logos";
 
   console.log("[viz] Prompt:", prompt.slice(0, 200));
 
