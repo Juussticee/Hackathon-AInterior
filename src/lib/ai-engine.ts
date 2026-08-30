@@ -744,15 +744,16 @@ export async function generateVisualization(
     .map(([desc, count]) => (count > 1 ? `${count} ${desc}s` : desc))
     .join(", ");
 
-  // Per-style trigger words — text-to-image models respond strongly to these
-  // rather than just a style name. These are carefully chosen to steer Flux.
+  // Per-style trigger words — text-to-image models respond strongly to these.
+  // Each includes editorial photography vocabulary so Flux produces magazine-quality shots,
+  // not generic "AI renders."
   const STYLE_TRIGGERS: Record<string, string> = {
-    minimalist: "minimalist, uncluttered, monochromatic, negative space, serene",
-    japandi: "japandi, wabi-sabi, Scandinavian hygge, organic warmth, muted earth tones, zen",
-    modern: "contemporary modern, geometric forms, polished surfaces, bold contrast",
-    industrial: "urban loft, exposed brick, raw metal, reclaimed wood, Edison bulbs, factory aesthetic",
-    bohemian: "boho eclectic, layered textiles, macramé, woven patterns, Moroccan lanterns, terracotta accents",
-    coastal: "coastal beach house, whitewashed wood, ocean blue accents, rattan furniture, linen curtains, sun-bleached palette, breezy seaside",
+    minimalist: "minimalist interior editorial photograph, Architectural Digest feature, uncluttered monochromatic space, negative space, serene calm, real home tour",
+    japandi: "japandi interior editorial photograph, wabi-sabi meets Scandinavian hygge, featured in Kinfolk magazine, organic warmth, muted earth tones, zen sanctuary, real home",
+    modern: "contemporary modern interior editorial photograph, Elle Decor feature, geometric forms, polished surfaces, bold contrast, curated designer home, real architecture",
+    industrial: "industrial loft interior editorial photograph, Dwell magazine feature, exposed brick walls, raw metal beams, reclaimed wood, Edison bulbs, converted warehouse, real space",
+    bohemian: "bohemian eclectic interior editorial photograph, House Beautiful feature, layered textiles, macramé wall art, Moroccan lanterns, terracotta, curated collected home, lived-in warmth",
+    coastal: "coastal beach house interior editorial photograph, Coastal Living magazine feature, whitewashed wood, ocean blue accents, rattan furniture, linen curtains, sun-bleached palette, breezy seaside home",
   };
   const styleTriggers = STYLE_TRIGGERS[styleSlug] || style.name;
 
@@ -823,34 +824,43 @@ export async function generateVisualization(
   const prompt = [
     // Style trigger — most important, placed first so diffusion model latches on first
     styleTriggers,
-    `professional interior design photograph of a ${roomDesc}`,
-    `wide-angle shot from the room entrance looking inward`,
+    // Camera/lens — specific photography equipment cues prevent the "3D render" look
+    `shot on Canon EOS R5 with tilt-shift 24mm lens`,
+    `interior photograph of a beautifully designed ${roomDesc}`,
+    `wide-angle shot from the room entrance looking inward, one-point perspective`,
     `${spaceAnalysis.estimatedAreaSqm.toFixed(0)} square meter room`,
     // Products
-    `furniture: ${furnitureDescriptions}`,
+    `featuring: ${furnitureDescriptions}`,
     // Style-specific furniture visual properties
-    furnitureCues ? `furniture style: ${furnitureCues}` : null,
+    furnitureCues ? `furniture details: ${furnitureCues}` : null,
     // Color palette — explicit and comprehensive
-    `wall and textile colors: ${primaryColors}`,
-    `accent colors: ${accentColors}`,
+    `color palette: ${primaryColors}`,
+    `accent tones: ${accentColors}`,
     // Materials
     `materials and textures: ${materialNames}`,
-    // Lighting
+    // Lighting — atmospheric descriptors
     style.lightingPreference || "warm afternoon natural lighting from windows",
-    // Photo quality
-    "photorealistic, magazine quality, professional staging, 8k resolution, architectural photography",
+    `soft shadows, natural light filling the room, golden hour warmth`,
+    // Editorial quality — magazine references steer toward real photography
+    "editorial interior photography, professionally staged, high-end real estate listing",
+    // Warmth/lived-in — prevents sterile empty rooms
+    "inviting lived-in space, fresh flowers, styled accessories, designer curated",
     // Negative guidance
-    avoidColors ? `avoid colors: ${avoidColors}` : null,
+    avoidColors ? `avoid: ${avoidColors}` : null,
   ]
     .filter(Boolean)
-    .join(", ") + ", no people, no text, no watermarks, no logos";
+    .join(", ");
+
+  // Negative prompt — explicit exclusion of CGI/AI artifacts
+  const negativePrompt = "CGI, 3D render, plastic textures, warped geometry, floating objects, oversaturated colors, artificial lighting, people, text, watermarks, logos, cartoon, illustration, painting, drawing, sketch, low quality, blurry, deformed";
 
   console.log("[viz] Prompt:", prompt.slice(0, 200));
 
   try {
     const encoded = encodeURIComponent(prompt);
+    const negEncoded = encodeURIComponent(negativePrompt);
     const seed = Math.abs(prompt.split("").reduce((a, c) => a + c.charCodeAt(0), 0)) % 100000;
-    const pollinationsUrl = `https://image.pollinations.ai/prompt/${encoded}?width=1344&height=768&model=flux&seed=${seed}&nologo=true`;
+    const pollinationsUrl = `https://image.pollinations.ai/prompt/${encoded}?width=1344&height=768&model=flux&seed=${seed}&nologo=true&enhance=true&negative_prompt=${negEncoded}`;
 
     // Pre-fetch server-side: Pollinations returns 200 with empty body while generating.
     // We must wait for actual image bytes before returning.
