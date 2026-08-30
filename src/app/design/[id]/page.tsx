@@ -20,6 +20,7 @@ import {
   Printer,
   Share2,
   Link as LinkIcon,
+  Eye,
   X,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -74,6 +75,23 @@ export default function DesignResultPage() {
   const [vizError, setVizError] = useState(false);
   const [vizLoaded, setVizLoaded] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<{ url: string; productName: string; productUrl: string; productImageUrl: string } | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewTab, setPreviewTab] = useState<"product" | "room">("product");
+
+  function buildPreviewUrl(sp: DesignProduct, d: Design): string {
+    let colors: string[] = [];
+    try {
+      colors = typeof sp.product.colors === "string" ? JSON.parse(sp.product.colors) : sp.product.colors || [];
+    } catch { colors = []; }
+    const colorDesc = colors.length > 0 ? colors.slice(0, 2).join(" and ") + " " : "";
+    const materials = sp.product.materials ? sp.product.materials.split(",")[0].trim() + " " : "";
+    const style = d.style_slug.replace(/-/g, " ");
+    const room = d.room_type.replace(/_/g, " ");
+    const prompt = `${colorDesc}${materials}${sp.product.name}, placed in a ${style} style ${room}, photorealistic interior design, soft natural lighting, high quality`;
+    const seed = sp.product.id.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
+    return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=800&height=600&seed=${seed}&nologo=true`;
+  }
 
   useEffect(() => {
     if (status === "unauthenticated") router.push(`/login?callbackUrl=/design/${id}`);
@@ -461,6 +479,22 @@ export default function DesignResultPage() {
                         AI Image
                       </span>
                     )}
+                    <button
+                      onClick={() => {
+                        setPreviewLoading(true);
+                        setPreviewTab("product");
+                        setPreviewUrl({
+                          url: buildPreviewUrl(sp, design),
+                          productName: p.name,
+                          productUrl: p.product_url,
+                          productImageUrl: p.main_image_url || "",
+                        });
+                      }}
+                      className="absolute bottom-2 left-2 flex items-center gap-1.5 bg-brand-700/90 hover:bg-brand-800 text-white text-[10px] font-semibold px-2.5 py-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 backdrop-blur-sm"
+                    >
+                      <Eye className="w-3 h-3" />
+                      Preview in Room
+                    </button>
                     <span className="absolute bottom-2 right-2 bg-white/90 backdrop-blur-sm text-brand-600 text-[10px] font-medium px-2 py-0.5 rounded-full border border-brand-100 capitalize">
                       {sp.category || p.subcategory.replace(/-/g, " ")}
                     </span>
@@ -534,6 +568,86 @@ export default function DesignResultPage() {
           </div>
         </div>
       </div>
+
+      {/* Product Room Preview Modal */}
+      {previewUrl && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+          onClick={() => { setPreviewUrl(null); setPreviewLoading(false); }}
+        >
+          <div
+            className="relative bg-white rounded-2xl overflow-hidden shadow-2xl max-w-2xl w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-brand-100">
+              <div className="flex items-center gap-2">
+                <Eye className="w-4 h-4 text-brand-500" />
+                <span className="text-sm font-semibold text-brand-800 line-clamp-1">{previewUrl.productName}</span>
+              </div>
+              <button
+                onClick={() => { setPreviewUrl(null); setPreviewLoading(false); }}
+                className="p-1.5 rounded-lg hover:bg-brand-50 text-brand-400 hover:text-brand-700 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex border-b border-brand-100">
+              <button
+                onClick={() => setPreviewTab("product")}
+                className={`flex-1 py-2.5 text-xs font-semibold transition-colors ${previewTab === "product" ? "text-brand-800 border-b-2 border-brand-700" : "text-brand-400 hover:text-brand-600"}`}
+              >
+                Product Photo
+              </button>
+              <button
+                onClick={() => { setPreviewTab("room"); setPreviewLoading(true); }}
+                className={`flex-1 py-2.5 text-xs font-semibold transition-colors ${previewTab === "room" ? "text-brand-800 border-b-2 border-brand-700" : "text-brand-400 hover:text-brand-600"}`}
+              >
+                AI Room Preview
+              </button>
+            </div>
+
+            {/* Image area */}
+            <div className="relative aspect-[4/3] bg-brand-50">
+              {previewTab === "product" ? (
+                <img
+                  src={previewUrl.productImageUrl}
+                  alt={previewUrl.productName}
+                  className="w-full h-full object-contain p-4"
+                  onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=80"; }}
+                />
+              ) : (
+                <>
+                  {previewLoading && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                      <Loader2 className="w-8 h-8 text-brand-400 animate-spin" />
+                      <p className="text-sm text-brand-500">Generating room preview…</p>
+                    </div>
+                  )}
+                  <img
+                    src={previewUrl.url}
+                    alt="Room preview"
+                    className={`w-full h-full object-cover transition-opacity duration-500 ${previewLoading ? "opacity-0" : "opacity-100"}`}
+                    onLoad={() => setPreviewLoading(false)}
+                    onError={() => setPreviewLoading(false)}
+                  />
+                </>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="px-4 py-3 bg-brand-50 border-t border-brand-100">
+              <p className="text-[11px] text-brand-400 text-center">
+                {previewTab === "product"
+                  ? "Official product photo from the retailer."
+                  : "AI-generated visualization. Actual product appearance may vary."}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

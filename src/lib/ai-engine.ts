@@ -323,8 +323,7 @@ function filterProducts(
   // First attempt: style + room + category
   const strict = rows.filter((p) => matchStyle(p) && matchRoomCat(p));
 
-  // Fallback 1: if style is too restrictive (new styles with no tagged products),
-  // relax the style filter but keep room + category
+  // Fallback 1: if style is too restrictive, relax the style filter but keep room + category
   if (strict.length < 5) {
     const relaxed = rows.filter(matchRoomCat);
     if (relaxed.length >= 5) {
@@ -336,7 +335,6 @@ function filterProducts(
     }
 
     // Fallback 2: room has no tagged products (e.g. studio, kids_room)
-    // Drop room filter, keep category + style
     const noRoom = rows.filter((p) => {
       const sub = (p.subcategory || "").toLowerCase().replace(/\s+/g, "-");
       const matchesCategory = !hasCatFilter || expandedCats.has(sub);
@@ -350,12 +348,29 @@ function filterProducts(
       return noRoom;
     }
 
-    // Fallback 3: drop all filters except price — use entire catalog
+    // Fallback 3: drop all filters except price — use entire catalog within 60% budget
     if (rows.length > 0) {
       console.warn(
         `[filterProducts] All filters exhausted, returning full catalog (${rows.length} candidates)`
       );
       return rows;
+    }
+  }
+
+  // Final fallback: widen SQL budget limit to total budget if 60% pool is empty
+  if (rows.length === 0) {
+    const budgetRows = db
+      .prepare(
+        `SELECT p.*, c.name as company_name FROM products p
+         JOIN companies c ON p.company_id = c.id
+         WHERE p.is_available = 1 AND c.enabled = 1
+           AND p.price_aed <= ?
+         ORDER BY p.is_featured DESC, p.price_aed ASC`
+      )
+      .all(budgetAed) as RawProduct[];
+    if (budgetRows.length > 0) {
+      console.warn(`[filterProducts] No products under 60% budget, widening to total budget (${budgetRows.length} candidates)`);
+      return budgetRows;
     }
   }
 
@@ -365,6 +380,76 @@ function filterProducts(
 // ================================================================
 // STAGE 3: AI Product Selection (Gemini 1.5 Flash — text)
 // ================================================================
+function fallbackSelectProducts(
+  candidates: RawProduct[],
+  requiredCategories: string[],
+  budgetAed: number,
+  styleSlug: string
+): SelectedProduct[] {
+  const categoryToSubcategories: Record<string, string[]> = {
+    bed: ["beds"],
+    nightstand: ["nightstands"],
+    dresser: ["storage"],
+    sofa: ["sofas"],
+    "coffee-table": ["coffee-tables"],
+    "tv-unit": ["tv-units"],
+    "dining-table": ["dining-tables"],
+    chairs: ["desk-chairs", "dining-tables"],
+    lighting: ["table-lamps", "floor-lamps", "pendant-lights"],
+    rug: ["rugs"],
+    storage: ["storage", "bookcases", "sideboards"],
+    sideboard: ["sideboards", "storage"],
+    decor: ["rugs", "table-lamps", "floor-lamps"],
+  };
+
+  const selected: SelectedProduct[] = [];
+  const usedIds = new Set<string>();
+  let remainingBudget = budgetAed;
+
+  for (const category of requiredCategories) {
+    const subs = categoryToSubcategories[category] || [category];
+    const matches = candidates
+      .filter((c) => {
+        const matchesSub = subs.some((s) =>
+          c.subcategory.toLowerCase().includes(s.toLowerCase())
+        );
+        return !usedIds.has(c.id) && matchesSub && c.price_aed <= remainingBudget;
+      })
+      .sort((a, b) => a.price_aed - b.price_aed);
+
+    const pick = matches[0];
+    if (pick) {
+      const subcategoryLabel = pick.subcategory.replace(/-/g, " ");
+      selected.push({
+        productId: pick.id,
+        reason: `Selected to cover ${category} within budget using a ${subcategoryLabel} piece.`,
+        category,
+      });
+      usedIds.add(pick.id);
+      remainingBudget -= pick.price_aed;
+    }
+  }
+
+  if (selected.length === 0) {
+    const cheapest = candidates
+      .filter((c) => c.price_aed <= remainingBudget)
+      .sort((a, b) => a.price_aed - b.price_aed)
+      .slice(0, 5);
+    for (const c of cheapest) {
+      selected.push({
+        productId: c.id,
+        reason: `Selected as a budget-friendly option for this ${styleSlug} design.`,
+        category: c.subcategory,
+      });
+    }
+  }
+
+  if (selected.length === 0) {
+    throw new Error("No matching products found in catalog");
+  }
+  return selected;
+}
+
 export async function selectProducts(
   spaceAnalysis: SpaceAnalysis,
   styleSlug: string,
@@ -551,7 +636,8 @@ Return ONLY valid JSON (no markdown):
     }
 
     console.error("Product selection error:", error);
-    throw error;
+    console.log("[selectProducts] Falling back to deterministic selection");
+    return fallbackSelectProducts(candidates, allCategories, budgetAed, styleSlug);
   }
 }
 
@@ -867,6 +953,24 @@ Keep it professional, warm, and exciting. No bullet points — flowing paragraph
 }
 
 // ================================================================
+// CURATED REFERENCE LOOKUP
+// ================================================================
+function findCuratedDesign(
+  styleSlug: string,
+  roomType: string
+): Record<string, unknown> | undefined {
+  const referenceUrl = `/uploads/viz-${styleSlug}-${roomType}-reference.jpg`;
+  return db
+    .prepare(
+      `SELECT * FROM design_projects
+       WHERE style_slug = ? AND room_type = ? AND status = 'completed'
+         AND visualization_url = ?
+       ORDER BY created_at DESC LIMIT 1`
+    )
+    .get(styleSlug, roomType, referenceUrl) as Record<string, unknown> | undefined;
+}
+
+// ================================================================
 // FULL PIPELINE
 // ================================================================
 export async function runDesignPipeline(params: {
@@ -898,8 +1002,53 @@ export async function runDesignPipeline(params: {
     params.dimensions
   );
 
+  // Stage 1b: Use curated reference design if one exists and fits the budget
+  const curated = findCuratedDesign(params.styleSlug, params.roomType);
+  if (curated) {
+    const curatedTotal = Number(curated.total_cost_aed || 0);
+    if (curatedTotal <= params.budgetAed) {
+      console.log(
+        `[runDesignPipeline] Using curated reference for ${params.styleSlug} ${params.roomType}`
+      );
+      const curatedSelected = JSON.parse(
+        (curated.selected_products as string) || "[]"
+      ) as SelectedProduct[];
+      const curatedViz = (curated.visualization_url as string | null) || null;
+      const curatedExplanation =
+        (curated.design_explanation as string) ||
+        "Your curated design has been assembled with hand-picked pieces from our approved UAE catalog.";
+
+      db.prepare(
+        `UPDATE design_projects SET
+           status = 'completed',
+           space_analysis = ?,
+           selected_products = ?,
+           visualization_url = ?,
+           design_explanation = ?,
+           total_cost_aed = ?,
+           updated_at = datetime('now')
+         WHERE id = ?`
+      ).run(
+        JSON.stringify(spaceAnalysis),
+        JSON.stringify(curatedSelected),
+        curatedViz,
+        curatedExplanation,
+        curatedTotal,
+        projectId
+      );
+
+      return {
+        spaceAnalysis,
+        selectedProducts: curatedSelected,
+        visualizationUrl: curatedViz,
+        explanation: curatedExplanation,
+        totalCostAed: curatedTotal,
+      };
+    }
+  }
+
   // Stage 2 + 3: Filter & select products (may throw if catalog is empty)
-  let selectedProducts: SelectedProduct[];
+  let selectedProducts;
   try {
     console.log(`[pipeline:${projectId}] Stage 2-3: Selecting products...`);
     selectedProducts = await selectProducts(

@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
     ],
     dangerouslyAllowSVG: true,
   },
-  serverExternalPackages: ["better-sqlite3", "@google/generative-ai"],
+  serverExternalPackages: ["better-sqlite3", "@google/generative-ai", "@imgly/background-removal-node", "sharp"],
 };
 
 
