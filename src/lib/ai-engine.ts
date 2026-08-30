@@ -693,6 +693,10 @@ export async function generateVisualization(
     "#00838F": "teal", "#4DB6AC": "seafoam green",
     // Modern
     "#1565C0": "cobalt blue", "#0D47A1": "deep navy", "#FF6F00": "amber orange",
+    // Avoid colors (appear in style.avoid palettes but not primary/accent)
+    "#FF0000": "pure red", "#FFD700": "bright gold", "#00FF00": "neon green",
+    "#FF69B4": "hot pink", "#FF1493": "deep pink", "#FF6347": "tomato red",
+    "#E1BEE7": "lavender", "#B2DFDB": "pale mint", "#CFD8DC": "cool grey",
   };
 
   // Resolve all palette entries to readable names
