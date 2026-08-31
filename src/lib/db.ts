@@ -2,9 +2,39 @@ import Database from "better-sqlite3";
 import path from "path";
 import fs from "fs";
 
-const DB_PATH = path.join(process.cwd(), "data", "ainterior.db");
+/**
+ * On Vercel (and other read-only-fs serverless platforms), the bundled DB
+ * from the build step lives in the read-only deployment filesystem.
+ * We copy it to /tmp (the only writable directory) so writes succeed.
+ * Data won't persist across cold starts, but that's fine for a demo.
+ */
+const isVercel = !!process.env.VERCEL || !!process.env.VERCEL_ENV;
+const BUNDLED_DB_PATH = path.join(process.cwd(), "data", "ainterior.db");
 
-// Ensure data directory exists
+function resolveDbPath(): string {
+  if (!isVercel) return BUNDLED_DB_PATH;
+
+  const tmpDbPath = path.join("/tmp", "ainterior.db");
+  try {
+    // Copy seeded DB from build output to writable /tmp on first cold start
+    if (fs.existsSync(BUNDLED_DB_PATH) && !fs.existsSync(tmpDbPath)) {
+      fs.copyFileSync(BUNDLED_DB_PATH, tmpDbPath);
+      // Also copy WAL/SHM files if they exist
+      for (const suffix of ["-wal", "-shm"]) {
+        const src = BUNDLED_DB_PATH + suffix;
+        if (fs.existsSync(src)) fs.copyFileSync(src, tmpDbPath + suffix);
+      }
+    }
+    return tmpDbPath;
+  } catch {
+    // Fallback to bundled path (read-only — queries work, writes fail)
+    return BUNDLED_DB_PATH;
+  }
+}
+
+const DB_PATH = resolveDbPath();
+
+// Ensure data directory exists (local dev only)
 const dataDir = path.dirname(DB_PATH);
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
