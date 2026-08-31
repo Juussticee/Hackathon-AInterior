@@ -10,24 +10,27 @@ import fs from "fs";
  */
 const isVercel = !!process.env.VERCEL || !!process.env.VERCEL_ENV;
 const BUNDLED_DB_PATH = path.join(process.cwd(), "data", "ainterior.db");
+// Pre-seeded DB committed to repo for serverless deployments
+const SEEDED_DB_PATH = path.join(process.cwd(), "src", "data", "seeded.db");
 
 function resolveDbPath(): string {
   if (!isVercel) return BUNDLED_DB_PATH;
 
   const tmpDbPath = path.join("/tmp", "ainterior.db");
   try {
-    // Copy seeded DB from build output to writable /tmp on first cold start
-    if (fs.existsSync(BUNDLED_DB_PATH) && !fs.existsSync(tmpDbPath)) {
-      fs.copyFileSync(BUNDLED_DB_PATH, tmpDbPath);
-      // Also copy WAL/SHM files if they exist
-      for (const suffix of ["-wal", "-shm"]) {
-        const src = BUNDLED_DB_PATH + suffix;
-        if (fs.existsSync(src)) fs.copyFileSync(src, tmpDbPath + suffix);
+    if (!fs.existsSync(tmpDbPath)) {
+      // On first cold start, copy the pre-seeded DB to writable /tmp
+      const source = fs.existsSync(BUNDLED_DB_PATH) ? BUNDLED_DB_PATH : SEEDED_DB_PATH;
+      if (fs.existsSync(source)) {
+        fs.copyFileSync(source, tmpDbPath);
+        for (const suffix of ["-wal", "-shm"]) {
+          const src = source + suffix;
+          if (fs.existsSync(src)) fs.copyFileSync(src, tmpDbPath + suffix);
+        }
       }
     }
     return tmpDbPath;
   } catch {
-    // Fallback to bundled path (read-only — queries work, writes fail)
     return BUNDLED_DB_PATH;
   }
 }
