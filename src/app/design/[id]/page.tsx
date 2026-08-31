@@ -78,6 +78,7 @@ export default function DesignResultPage() {
   const [previewUrl, setPreviewUrl] = useState<{ url: string; productName: string; productUrl: string; productImageUrl: string } | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewTab, setPreviewTab] = useState<"product" | "room">("product");
+  const [retrying, setRetrying] = useState(false);
 
   function buildPreviewUrl(sp: DesignProduct, d: Design): string {
     let colors: string[] = [];
@@ -132,6 +133,49 @@ export default function DesignResultPage() {
     load();
   }, [id]);
 
+  // Auto-poll for 'processing' designs (check every 5s)
+  useEffect(() => {
+    if (!design || design.status !== "processing") return;
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/designs/${id}`);
+        if (res.ok) {
+          const data = await res.json();
+          const d = data.design as Design;
+          if (d.status !== "processing") {
+            setDesign(d);
+            clearInterval(interval);
+          }
+        }
+      } catch { /* ignore poll errors */ }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [design?.status, id]);
+
+  async function handleRetry() {
+    if (retrying) return;
+    setRetrying(true);
+    try {
+      const res = await fetch(`/api/designs/${id}`, { method: "POST" });
+      if (res.ok) {
+        toast("Design regenerated successfully!", "success");
+        // Re-fetch the full design from the GET endpoint (properly formatted)
+        const getRes = await fetch(`/api/designs/${id}`);
+        if (getRes.ok) {
+          const data = await getRes.json();
+          setDesign(data.design as Design);
+        }
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        toast(errData.error || "Regeneration failed. Please try again.", "error");
+      }
+    } catch {
+      toast("Network error. Please try again.", "error");
+    } finally {
+      setRetrying(false);
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
@@ -154,6 +198,69 @@ export default function DesignResultPage() {
           >
             Go to Dashboard
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Stuck or actively processing state
+  if (design.status === "processing") {
+    return (
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
+        <div className="text-center max-w-md mx-4">
+          <div className="relative w-16 h-16 mx-auto mb-6">
+            <div className="absolute inset-0 rounded-full border-4 border-brand-100" />
+            <div className="absolute inset-0 rounded-full border-4 border-brand-600 border-t-transparent animate-spin" />
+            <Sparkles className="absolute inset-0 m-auto w-6 h-6 text-brand-500" />
+          </div>
+          <h2 className="text-xl font-bold text-brand-900 mb-2">
+            Generating Your Design
+          </h2>
+          <p className="text-brand-500 text-sm mb-4">
+            Our AI is crafting your personalized interior design. This can take up to 2 minutes.
+          </p>
+          <p className="text-brand-400 text-xs">
+            This page will update automatically when your design is ready.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Failed state with retry option
+  if (design.status === "failed") {
+    return (
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
+        <div className="text-center max-w-md mx-4 bg-white rounded-2xl p-8 shadow-lg border border-brand-100">
+          <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-red-50 flex items-center justify-center">
+            <X className="w-8 h-8 text-red-500" />
+          </div>
+          <h2 className="text-xl font-bold text-brand-900 mb-2">
+            Design Generation Failed
+          </h2>
+          <p className="text-brand-500 text-sm mb-6">
+            Something went wrong while creating your design. This is usually a temporary issue — the AI service may have timed out or been unavailable.
+          </p>
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={handleRetry}
+              disabled={retrying}
+              className="flex items-center justify-center gap-2 px-6 py-3 bg-brand-600 text-white rounded-lg font-medium hover:bg-brand-700 disabled:opacity-50 transition-colors"
+            >
+              {retrying ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <span className="text-lg">↻</span>
+              )}
+              {retrying ? "Regenerating..." : "Retry Generation"}
+            </button>
+            <button
+              onClick={() => router.push("/dashboard")}
+              className="text-brand-400 hover:text-brand-600 text-sm font-medium"
+            >
+              Back to Dashboard
+            </button>
+          </div>
         </div>
       </div>
     );

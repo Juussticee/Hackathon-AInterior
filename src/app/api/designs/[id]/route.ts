@@ -30,6 +30,19 @@ export async function GET(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  // Auto-transition stuck 'processing' designs (>5 min) to 'failed'.
+  // This handles server restarts that kill in-flight pipeline executions.
+  if (design.status === "processing") {
+    const updated = new Date(design.updated_at as string).getTime();
+    const fiveMinAgo = Date.now() - 5 * 60 * 1000;
+    if (updated < fiveMinAgo) {
+      db.prepare(
+        "UPDATE design_projects SET status = 'failed', updated_at = datetime('now') WHERE id = ?"
+      ).run(id);
+      design.status = "failed";
+    }
+  }
+
   // Parse JSON fields
   if (typeof design.space_analysis === "string") {
     try { design.space_analysis = JSON.parse(design.space_analysis); } catch { design.space_analysis = null; }
@@ -136,6 +149,20 @@ export async function POST(
   }
 
   try {
+    // Guard: if the design is currently being processed, allow re-run only
+    // if it's been stuck for >5 minutes (server restart recovery).
+    if (design.status === "processing") {
+      const updated = new Date(design.updated_at as string).getTime();
+      const fiveMinAgo = Date.now() - 5 * 60 * 1000;
+      if (updated >= fiveMinAgo) {
+        return NextResponse.json(
+          { error: "Design is currently being generated. Please wait." },
+          { status: 409 }
+        );
+      }
+      // Stuck — allow re-run
+    }
+
     // Overall pipeline timeout: 3 minutes max (covers Gemini + Pollinations calls)
     const PIPELINE_TIMEOUT_MS = 180_000;
     const result = await Promise.race([

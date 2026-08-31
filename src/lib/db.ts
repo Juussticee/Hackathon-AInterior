@@ -2,6 +2,11 @@ import Database from "better-sqlite3";
 import path from "path";
 import fs from "fs";
 
+// Embedded pre-seeded DB — guaranteed to be in the serverless bundle
+// because it's a .cjs module (traced by Next.js / @vercel/nft).
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const SEEDED_DB_BUFFER: Buffer = require("../data/seeded-db-buf.cjs");
+
 /**
  * On Vercel (and other read-only-fs serverless platforms), the bundled DB
  * from the build step lives in the read-only deployment filesystem.
@@ -27,6 +32,9 @@ function resolveDbPath(): string {
           const src = source + suffix;
           if (fs.existsSync(src)) fs.copyFileSync(src, tmpDbPath + suffix);
         }
+      } else if (SEEDED_DB_BUFFER && SEEDED_DB_BUFFER.length > 0) {
+        // Final fallback: write the embedded base64 buffer to /tmp
+        fs.writeFileSync(tmpDbPath, SEEDED_DB_BUFFER);
       }
     }
     return tmpDbPath;
