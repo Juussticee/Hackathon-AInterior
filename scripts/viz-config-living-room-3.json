@@ -1,0 +1,11 @@
+{
+  "styleName": "Minimalist",
+  "roomType": "living room",
+  "dimensions": { "length": 500, "width": 400 },
+  "products": [
+    { "name": "Demaris 3-Seater Fabric Sofa, caramel light brown fabric upholstery with wooden legs and cream cushions, large sofa against the back wall as the centerpiece of the room", "color": "Light Brown", "dims": "270×123×72" },
+    { "name": "Lucia TV Unit with Extendable Top, off-white almond low media cabinet against the left wall with a black flat screen TV on top", "color": "Off White and Almond", "dims": "120×40×45" },
+    { "name": "Galeria Lux Modern Contemporary Rug, bold brown and white geometric pattern area rug covering the floor in the center of the room", "color": "Brown and White", "dims": "230×160" },
+    { "name": "Seon Glass Pendant Chandelier, cluster of glowing amber glass sphere lights hanging from the ceiling in the center of the room above the coffee table", "color": "Amber glass", "dims": "D25×H150" }
+  ]
+}
