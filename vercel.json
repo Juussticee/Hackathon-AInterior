@@ -1,4 +1,4 @@
 {
   "buildCommand": "npm run build",
-  "installCommand": "npm install --ignore-scripts=false"
+  "installCommand": "npm install && npm rebuild better-sqlite3"
 }
