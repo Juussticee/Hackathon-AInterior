@@ -965,19 +965,37 @@ Keep it professional, warm, and exciting. No bullet points — flowing paragraph
 // ================================================================
 // CURATED REFERENCE LOOKUP
 // ================================================================
+// Reference designs follow /uploads/viz-{style}-{room}-reference{N}.jpg naming,
+// one tier per budget level. Picks the richest tier that fits the budget.
 function findCuratedDesign(
   styleSlug: string,
-  roomType: string
+  roomType: string,
+  budgetAed: number
 ): Record<string, unknown> | undefined {
-  const referenceUrl = `/uploads/viz-${styleSlug}-${roomType}-reference.jpg`;
-  return db
+  const pattern = `/uploads/viz-${styleSlug}-${roomType}-reference%`;
+  const rows = db
     .prepare(
       `SELECT * FROM design_projects
        WHERE style_slug = ? AND room_type = ? AND status = 'completed'
-         AND visualization_url = ?
-       ORDER BY created_at DESC LIMIT 1`
+         AND visualization_url LIKE ?
+       ORDER BY created_at DESC`
     )
-    .get(styleSlug, roomType, referenceUrl) as Record<string, unknown> | undefined;
+    .all(styleSlug, roomType, pattern) as Record<string, unknown>[];
+
+  const newestPerTier = new Map<string, Record<string, unknown>>();
+  for (const row of rows) {
+    const url = row.visualization_url as string;
+    if (!newestPerTier.has(url)) newestPerTier.set(url, row);
+  }
+
+  let best: Record<string, unknown> | undefined;
+  for (const tier of newestPerTier.values()) {
+    const total = Number(tier.total_cost_aed || 0);
+    if (total <= budgetAed && (!best || total > Number(best.total_cost_aed || 0))) {
+      best = tier;
+    }
+  }
+  return best;
 }
 
 // ================================================================
@@ -1013,48 +1031,46 @@ export async function runDesignPipeline(params: {
   );
 
   // Stage 1b: Use curated reference design if one exists and fits the budget
-  const curated = findCuratedDesign(params.styleSlug, params.roomType);
+  const curated = findCuratedDesign(params.styleSlug, params.roomType, params.budgetAed);
   if (curated) {
     const curatedTotal = Number(curated.total_cost_aed || 0);
-    if (curatedTotal <= params.budgetAed) {
-      console.log(
-        `[runDesignPipeline] Using curated reference for ${params.styleSlug} ${params.roomType}`
-      );
-      const curatedSelected = JSON.parse(
-        (curated.selected_products as string) || "[]"
-      ) as SelectedProduct[];
-      const curatedViz = (curated.visualization_url as string | null) || null;
-      const curatedExplanation =
-        (curated.design_explanation as string) ||
-        "Your curated design has been assembled with hand-picked pieces from our approved UAE catalog.";
+    console.log(
+      `[runDesignPipeline] Using curated reference for ${params.styleSlug} ${params.roomType}`
+    );
+    const curatedSelected = JSON.parse(
+      (curated.selected_products as string) || "[]"
+    ) as SelectedProduct[];
+    const curatedViz = (curated.visualization_url as string | null) || null;
+    const curatedExplanation =
+      (curated.design_explanation as string) ||
+      "Your curated design has been assembled with hand-picked pieces from our approved UAE catalog.";
 
-      db.prepare(
-        `UPDATE design_projects SET
-           status = 'completed',
-           space_analysis = ?,
-           selected_products = ?,
-           visualization_url = ?,
-           design_explanation = ?,
-           total_cost_aed = ?,
-           updated_at = datetime('now')
-         WHERE id = ?`
-      ).run(
-        JSON.stringify(spaceAnalysis),
-        JSON.stringify(curatedSelected),
-        curatedViz,
-        curatedExplanation,
-        curatedTotal,
-        projectId
-      );
+    db.prepare(
+      `UPDATE design_projects SET
+         status = 'completed',
+         space_analysis = ?,
+         selected_products = ?,
+         visualization_url = ?,
+         design_explanation = ?,
+         total_cost_aed = ?,
+         updated_at = datetime('now')
+       WHERE id = ?`
+    ).run(
+      JSON.stringify(spaceAnalysis),
+      JSON.stringify(curatedSelected),
+      curatedViz,
+      curatedExplanation,
+      curatedTotal,
+      projectId
+    );
 
-      return {
-        spaceAnalysis,
-        selectedProducts: curatedSelected,
-        visualizationUrl: curatedViz,
-        explanation: curatedExplanation,
-        totalCostAed: curatedTotal,
-      };
-    }
+    return {
+      spaceAnalysis,
+      selectedProducts: curatedSelected,
+      visualizationUrl: curatedViz,
+      explanation: curatedExplanation,
+      totalCostAed: curatedTotal,
+    };
   }
 
   // Stage 2 + 3: Filter & select products (may throw if catalog is empty)

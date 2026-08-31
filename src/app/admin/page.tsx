@@ -82,18 +82,23 @@ export default function AdminPage() {
 
   async function loadData() {
     try {
-      const [compRes, prodRes] = await Promise.all([
-        fetch("/api/admin/companies"),
-        fetch("/api/admin/products"),
-      ]);
+      const compRes = await fetch("/api/admin/companies");
       if (compRes.ok) {
         const d = await compRes.json();
         setCompanies(d.companies || []);
       }
-      if (prodRes.ok) {
-        const d = await prodRes.json();
-        setProducts(d.products || []);
-      }
+      const all: Product[] = [];
+      let page = 1;
+      let pages = 1;
+      do {
+        const res = await fetch(`/api/admin/products?page=${page}&limit=100`);
+        if (!res.ok) break;
+        const d = await res.json();
+        all.push(...(d.products || []));
+        pages = d.pages || 1;
+        page++;
+      } while (page <= pages);
+      setProducts(all);
     } catch (err) {
       setLoadError("Failed to load admin data. Check your connection and try again.");
     } finally {
@@ -443,7 +448,7 @@ export default function AdminPage() {
           )}
 
           <div className="space-y-2">
-            {products.slice(0, 50).map((p) => (
+            {products.map((p) => (
               <div
                 key={p.id}
                 className="bg-white border border-brand-100 rounded-xl p-3 flex items-center gap-3"
@@ -488,11 +493,6 @@ export default function AdminPage() {
                 </button>
               </div>
             ))}
-            {products.length > 50 && (
-              <p className="text-center text-sm text-brand-400 py-4">
-                Showing 50 of {products.length} products
-              </p>
-            )}
           </div>
         </div>
       )}
