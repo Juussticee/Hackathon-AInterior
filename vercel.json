@@ -1,4 +1,4 @@
 {
   "buildCommand": "npm run build",
-  "installCommand": "npm install && npm rebuild better-sqlite3"
+  "installCommand": "npm install && cd node_modules/better-sqlite3 && npx --yes node-gyp rebuild && cd ../.."
 }
